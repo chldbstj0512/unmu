@@ -29,7 +29,7 @@ export function GateScreen() {
           </div>
         </div>
         <p className="mt-6 text-base leading-8 text-[#3d3228]">
-          수험생의 산사. 안개가 걷히기 전에, 오늘의 분량을 선방에 내려놓으러 왔다.
+          수험생의 산사. 안개가 걷히기 전에, 오늘의 분량을 마당에 내려놓으러 왔다.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-3">
           <label className="block text-sm text-[#6b5c4a]" htmlFor="school">
@@ -81,12 +81,12 @@ export function GateScreen() {
           ))}
         </div>
         <Button className="mt-7 w-full" size="lg" onClick={() => enterWorld(vow, hours, school, department)}>
-          선방으로 들어간다
+          마당으로 들어간다
         </Button>
         <p className="mt-4 text-center text-xs leading-6 text-[#8a7764]">
           학교와 학과는 모자 위에 새겨지고, 뒤에서 따라온다.
           <br />
-          자기 방석 앞에 선다. 앉으면 공부가 시작된다. 기록은 이 브라우저에만 남는다.
+          선방 방석에 앉으면 공부가 시작된다. 기록은 이 브라우저에만 남는다.
         </p>
       </section>
     </div>

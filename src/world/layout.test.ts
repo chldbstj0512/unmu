@@ -48,39 +48,26 @@ test("spawn, spots, and seats stay out of walls", () => {
   }
 });
 
-test("the day starts in front of the personal cushion", () => {
-  const study = building("study");
-  assert.equal(placeAt(SPAWN.x, SPAWN.z), "선방");
+test("the day starts in the yard", () => {
+  assert.equal(placeAt(SPAWN.x, SPAWN.z), "마당");
   assert.equal(blocked(SPAWN.x, SPAWN.z), false);
-  assert.ok(Math.abs(groundY(SPAWN.x, SPAWN.z) - study.platform) < 1e-6);
-  const [seatX, seatZ] = worldXZ(study, DESK_X[0], SEAT_Z);
-  const aheadX = seatX - SPAWN.x;
-  const aheadZ = seatZ - SPAWN.z;
-  const fx = -Math.sin(SPAWN.yaw);
-  const fz = -Math.cos(SPAWN.yaw);
-  assert.ok(aheadX * fx + aheadZ * fz > 0.8);
-  assert.ok(Math.hypot(aheadX, aheadZ) > 1.45);
-  const [nextX, nextZ] = worldXZ(study, DESK_X[1], SEAT_Z);
-  assert.ok(Math.hypot(aheadX, aheadZ) < Math.hypot(nextX - SPAWN.x, nextZ - SPAWN.z));
-  const [aisleX, aisleZ] = worldXZ(study, 0, 0.35);
-  const [doorX, doorZ] = worldXZ(study, 0, study.depth / 2 + 1);
-  walk(SPAWN.x, SPAWN.z, aisleX, aisleZ);
-  walk(aisleX, aisleZ, doorX, doorZ);
+  assert.equal(groundY(SPAWN.x, SPAWN.z), 0);
+  assert.equal(SPAWN.yaw, 0);
 });
 
 test("turning indoors cannot put the camera in the head or the roof", () => {
-  const gy = groundY(SPAWN.x, SPAWN.z);
+  const study = building("study");
+  const [x, z] = worldXZ(study, 0, 0.2);
+  const gy = groundY(x, z);
   for (let yaw = 0; yaw < Math.PI * 2; yaw += 0.35) {
     for (const pitch of [-0.85, -0.2, 0.45]) {
-      const cam = frameCamera(SPAWN.x, SPAWN.z, gy, yaw, pitch, 2.6, 0.82);
-      const gap = Math.hypot(cam.x - SPAWN.x, cam.y - (gy + 1.02), cam.z - SPAWN.z);
+      const cam = frameCamera(x, z, gy, yaw, pitch, 2.6, 0.82);
+      const gap = Math.hypot(cam.x - x, cam.y - (gy + 1.02), cam.z - z);
       assert.ok(gap > 0.9, `gap ${gap.toFixed(2)} at yaw ${yaw.toFixed(2)} pitch ${pitch}`);
       const cap = ceilingY(cam.x, cam.z);
       if (cap != null) assert.ok(cam.y < cap - 0.1, `camera ${cam.y.toFixed(2)} roof ${cap.toFixed(2)}`);
     }
   }
-  const raised = frameCamera(SPAWN.x, SPAWN.z, gy, SPAWN.yaw, -0.85, 2.6, 0.82);
-  assert.ok(raised.y < gy + 2.4);
 });
 
 test("paths connect the yard to each room", () => {

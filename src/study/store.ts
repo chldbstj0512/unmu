@@ -88,11 +88,6 @@ function write(next: StudyState) {
 function boot() {
   if (typeof localStorage === "undefined") return defaultState();
   let next = readLocal();
-  try {
-    if (sessionStorage.getItem("unmuam.entered") === "1") next = { ...next, entered: true };
-  } catch {
-    /* ignore */
-  }
   if (next.running && next.endsAt != null && Date.now() >= next.endsAt) {
     next = reduce(next, { type: "complete" }, Date.now());
     write(next);
@@ -172,11 +167,6 @@ export function enterWorld(intention: string, goalHours: number, school: string,
   ambience.unlock();
   const withVow = reduce(reduce(state, { type: "intention", intention }, Date.now()), { type: "goal", hours: goalHours }, Date.now());
   commit({ ...withVow, school: label(school, 24), department: label(department, 16), entered: true, fade: true }, true);
-  try {
-    sessionStorage.setItem("unmuam.entered", "1");
-  } catch {
-    /* ignore */
-  }
   window.setTimeout(() => {
     if (state.entered) commit({ ...state, fade: false }, false);
   }, 520);
