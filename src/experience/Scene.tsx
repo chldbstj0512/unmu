@@ -1,6 +1,6 @@
 import { Suspense, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postprocessing";
+import { EffectComposer, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
 import { ambience } from "../audio/ambience.ts";
 import { useStudy } from "../study/store.ts";
@@ -77,7 +77,6 @@ export function Scene() {
       <Ear />
       <Suspense fallback={null}>
         <EffectComposer multisampling={4}>
-          <Bloom intensity={0.38} luminanceThreshold={1} mipmapBlur />
           <Vignette offset={0.24} darkness={0.62} />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         </EffectComposer>
