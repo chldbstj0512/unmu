@@ -71,7 +71,7 @@ export function Hud() {
       </div>
       <div className="pointer-events-auto absolute bottom-3 left-3 hidden max-w-xs text-xs leading-5 text-[#f6efe2]/80 sm:block">
         <button type="button" className="underline-offset-4 hover:underline" onClick={() => setHelp(true)}>
-          WASD 걷기 · 클릭하여 뒤를 본다 · E 앉기
+          WASD 걷기 · 마우스를 끌어 좌우로 둘러본다 · E 앉기
         </button>
       </div>
       {world.nearby ? (

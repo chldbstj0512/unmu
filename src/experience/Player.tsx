@@ -20,7 +20,7 @@ import {
 } from "../world/layout.ts";
 
 const STEP = 0.42;
-const LOOK = 0.00215;
+const LOOK = 0.0048;
 
 function inRoom(x: number, z: number) {
   return BUILDINGS.some((item) => {
@@ -50,13 +50,6 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function dampAngle(current: number, target: number, delta: number) {
-  let diff = target - current;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  return current + diff * (1 - Math.pow(0.0015, delta));
-}
-
 function typingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
@@ -77,6 +70,7 @@ export function Player() {
   const pitch = useRef(-0.04);
   const bob = useRef(0);
   const reduced = useRef(false);
+  const seatAim = useRef<string | null>(null);
 
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -84,15 +78,47 @@ export function Player() {
 
   useEffect(() => {
     const canvas = gl.domElement;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    const canLook = () => {
+      const current = getState();
+      return current.entered && !current.sheetOpen && !current.breathOpen && !current.vowOpen && !current.recordOpen && !current.helpOpen && !current.fade;
+    };
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
-      if (!window.matchMedia("(pointer: fine)").matches) return;
-      const current = getState();
-      if (!current.entered || current.seatedId || current.sheetOpen || current.breathOpen || current.vowOpen || current.recordOpen || current.helpOpen || current.fade) return;
+      if (window.matchMedia("(pointer: coarse)").matches) return;
+      if (!canLook()) return;
+      dragging = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
       void canvas.requestPointerLock();
     };
+    const onMove = (event: PointerEvent) => {
+      if (document.pointerLockElement === canvas) {
+        input.lookX += event.movementX;
+        input.lookY += event.movementY;
+        return;
+      }
+      if (!dragging) return;
+      input.lookX += event.clientX - lastX;
+      input.lookY += event.clientY - lastY;
+      lastX = event.clientX;
+      lastY = event.clientY;
+    };
+    const onUp = () => {
+      dragging = false;
+    };
     canvas.addEventListener("pointerdown", onDown);
-    return () => canvas.removeEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      canvas.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
   }, [gl]);
 
   useEffect(() => {
@@ -176,14 +202,20 @@ export function Player() {
 
     const seated = ZONES.find((zone) => zone.id === seatedRef.current && zone.sit);
     if (seated) {
-      input.lookX = 0;
-      input.lookY = 0;
+      if (seatAim.current !== seated.id) {
+        seatAim.current = seated.id;
+        yaw.current = seated.yaw;
+        pitch.current = -0.28;
+      }
       const k = 1 - Math.pow(0.0015, delta);
       pos.current.x += (seated.x - pos.current.x) * k;
       pos.current.z += (seated.z - pos.current.z) * k;
-      yaw.current = dampAngle(yaw.current, seated.yaw, delta);
-      pitch.current += (-0.34 - pitch.current) * k;
+      yaw.current -= input.lookX * LOOK;
+      pitch.current = clamp(pitch.current + input.lookY * LOOK, -0.7, 0.35);
+      input.lookX = 0;
+      input.lookY = 0;
     } else if (!snapped) {
+      seatAim.current = null;
       yaw.current -= input.lookX * LOOK;
       pitch.current = clamp(pitch.current + input.lookY * LOOK, -0.85, 0.45);
       input.lookX = 0;
