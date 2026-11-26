@@ -20,7 +20,7 @@ export function RecordDialog() {
   return (
     <Dialog open={open} onOpenChange={setRecord}>
       <DialogContent>
-        <DialogTitle className="font-serif text-2xl">공부 기록</DialogTitle>
+        <DialogTitle className="text-2xl font-semibold tracking-tight">공부 기록</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-[#6b5c4a]">이 브라우저에만 남는다. 오늘은 {formatSpan(today)} / {formatSpan(goal)}.</DialogDescription>
         <div className="mt-5 flex h-24 items-end gap-2">
           {week.map((day) => (
@@ -33,7 +33,7 @@ export function RecordDialog() {
           ))}
         </div>
         <div className="mt-5 max-h-64 space-y-4 overflow-auto pr-1">
-          {days.length === 0 ? <p className="text-sm leading-7 text-[#6b5c4a]">아직 오늘은 조용하다. 선방 책상에 앉으면 기록이 남는다.</p> : null}
+          {days.length === 0 ? <p className="text-sm leading-7 text-[#6b5c4a]">오늘 기록이 아직 없다. 책상에 앉으면 남는다.</p> : null}
           {days.map((day) => (
             <section key={day.key}>
               <h3 className="font-serif text-sm">
@@ -81,15 +81,15 @@ export function VowDialog() {
   return (
     <Dialog open={open} onOpenChange={setVow}>
       <DialogContent>
-        <DialogTitle className="font-serif text-2xl">오늘의 다짐</DialogTitle>
+        <DialogTitle className="text-2xl font-semibold tracking-tight">오늘 한 줄</DialogTitle>
         <DialogDescription className="mt-1 text-sm leading-7 text-[#6b5c4a]">
-          대웅전에 두고 간다. 책상 위에도 같은 문장이 남는다.
+          책상에도 같은 문장이 남는다.
         </DialogDescription>
         <Input
           className="mt-5"
           maxLength={40}
           value={intention}
-          placeholder="한 단원만 정직하게"
+          placeholder="오늘 끝낼 한 단원"
           onChange={(event) => dispatch({ type: "intention", intention: event.target.value })}
         />
         <Button className="mt-4" onClick={() => setVow(false)}>
@@ -105,7 +105,7 @@ export function HelpDialog() {
   return (
     <Dialog open={open} onOpenChange={setHelp}>
       <DialogContent>
-        <DialogTitle className="font-serif text-2xl">암자에서</DialogTitle>
+        <DialogTitle className="text-2xl font-semibold tracking-tight">안내</DialogTitle>
         <DialogDescription className="mt-2 text-sm leading-7 text-[#3d3228]">
           걷기 WASD 또는 화살표. Shift는 천천히. 마당을 누른 채 마우스를 좌우로 끌면 시야가 돌아간다. Esc로 손을 놓는다.
           방석 앞에서 E, 또는 글을 누르면 앉는다. 지도의 번호나 숫자 1부터 6으로 장소를 옮긴다.
@@ -161,7 +161,7 @@ export function BreathOverlay() {
           className="mx-auto mt-6 grid h-40 w-40 place-items-center rounded-full border border-[#7a2e2a]/40"
           style={{ transform: reduced ? undefined : `scale(${done ? 1 : wide ? 1 : 0.72})`, transition: "transform 3.6s ease" }}
         >
-          <span className="font-serif text-3xl">{done ? "고르다" : phase}</span>
+          <span className="text-3xl font-medium">{done ? "끝" : phase}</span>
         </div>
         <p className="mt-4 text-sm text-[#6b5c4a]">{done ? "숨이 자리로 돌아왔다." : `${round} / 4`}</p>
         <div className="mt-6 flex gap-2">

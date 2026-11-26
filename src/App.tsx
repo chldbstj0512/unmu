@@ -24,7 +24,7 @@ const WEBGL = detectWebGL();
 function Fallback() {
   return (
     <div className="absolute inset-0 grid place-items-center bg-[#1c1612] px-6 text-center text-[#f3ead7]">
-      <p className="max-w-sm font-serif text-lg leading-8">이 브라우저에서는 마당을 열지 못했다. 공부는 책상 기록으로 이어갈 수 있다.</p>
+      <p className="max-w-sm text-lg leading-8">이 브라우저에서는 공간을 열지 못했다. 공부는 책상 기록으로 이어갈 수 있다.</p>
     </div>
   );
 }

@@ -134,9 +134,9 @@ export function engineTick() {
     commit({ ...state, tick: state.tick + 1 }, false);
   }
   if (state.running) {
-    document.title = `${formatClock(remainingSeconds(state, Date.now()))} · ${state.mode === "focus" ? state.subject : "쉼"} · 운무암`;
-  } else if (document.title !== "운무암") {
-    document.title = "운무암";
+    document.title = `${formatClock(remainingSeconds(state, Date.now()))} · ${state.mode === "focus" ? state.subject : "쉼"} · 운무`;
+  } else if (document.title !== "운무") {
+    document.title = "운무";
   }
 }
 

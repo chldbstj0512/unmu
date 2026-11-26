@@ -39,11 +39,8 @@ canvas {
 }
 
 .hanji {
-  background-color: #f4ead7;
-  background-image:
-    radial-gradient(rgba(90, 58, 28, 0.055) 0.6px, transparent 0.7px),
-    linear-gradient(180deg, rgba(255, 252, 245, 0.45), transparent 42%);
-  background-size: 7px 7px, 100% 100%;
+  background-color: #f6f5f2;
+  background-image: none;
 }
 
 .plaque {
@@ -112,19 +109,6 @@ canvas {
   width: 58%;
   height: 100%;
   touch-action: none;
-}
-
-.seal-mark {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border: 2px solid #8f2d2d;
-  color: #8f2d2d;
-  font-family: var(--font-serif);
-  letter-spacing: 0.12em;
-  transform: rotate(-8deg);
-  font-size: 14px;
 }
 
 @media (prefers-reduced-motion: reduce) {

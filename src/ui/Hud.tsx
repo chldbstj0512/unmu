@@ -64,7 +64,7 @@ export function Hud() {
         <Minimap />
       </div>
       <div className="absolute left-1/2 top-3 w-[min(280px,46vw)] -translate-x-1/2 text-center text-[#f6efe2] [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] sm:top-4">
-        <p className="font-serif text-lg tracking-[0.28em]">운무암</p>
+        <p className="text-sm font-medium tracking-tight">운무</p>
         <p className="text-sm">{world.place}</p>
         <Toast toast={toast} />
       </div>
