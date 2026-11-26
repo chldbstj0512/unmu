@@ -5,11 +5,11 @@ import {
   type Action,
   type Session,
   type StudyState,
-  type TimeId,
   defaultState,
   formatClock,
   reduce,
   remainingSeconds,
+  seoulTimeOfDay,
 } from "./logic.ts";
 import type { Spot, Zone } from "../world/layout.ts";
 
@@ -36,10 +36,6 @@ function sanitize(raw: unknown): StudyState {
   const base = defaultState();
   if (!raw || typeof raw !== "object") return base;
   const data = raw as Partial<StudyState>;
-  const timeOfDay: TimeId =
-    data.timeOfDay === "dawn" || data.timeOfDay === "day" || data.timeOfDay === "dusk" || data.timeOfDay === "night"
-      ? data.timeOfDay
-      : "dusk";
   const mode = data.mode === "break" ? "break" : "focus";
   const focusSeconds = num(data.focusSeconds, base.focusSeconds, 60, 180 * 60);
   const breakSeconds = num(data.breakSeconds, base.breakSeconds, 60, 60 * 60);
@@ -59,7 +55,7 @@ function sanitize(raw: unknown): StudyState {
     sessions: Array.isArray(data.sessions) ? data.sessions.filter(isSession).slice(-400) : [],
     sound: data.sound !== false,
     rain: data.rain === true,
-    timeOfDay,
+    timeOfDay: seoulTimeOfDay(Date.now()),
     mode,
     running,
     endsAt,
@@ -132,6 +128,8 @@ export function dispatch(action: Action) {
 
 export function engineTick() {
   const now = Date.now();
+  const sky = seoulTimeOfDay(now);
+  if (sky !== state.timeOfDay) commit({ ...state, timeOfDay: sky }, false);
   if (state.running && state.endsAt != null && now >= state.endsAt) {
     const finished = state.mode;
     commit(reduce(state, { type: "complete" }, now), true);
@@ -251,8 +249,3 @@ export function toggleSound() {
   commit({ ...state, sound: !state.sound }, true);
 }
 
-export function cycleTime() {
-  const order: TimeId[] = ["dawn", "day", "dusk", "night"];
-  const index = order.indexOf(state.timeOfDay);
-  commit({ ...state, timeOfDay: order[(index + 1) % order.length] ?? "dusk" }, true);
-}

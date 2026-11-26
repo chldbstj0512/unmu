@@ -82,6 +82,43 @@ const dayFormat = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",
 });
 
+const seoulClock = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Seoul",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+// Mid-month sunrise and sunset in Seoul, minutes from midnight. Korea has no daylight saving.
+const SEOUL_SUN: Array<[number, number]> = [
+  [7 * 60 + 47, 17 * 60 + 36],
+  [7 * 60 + 20, 18 * 60 + 8],
+  [6 * 60 + 40, 18 * 60 + 38],
+  [5 * 60 + 55, 19 * 60 + 8],
+  [5 * 60 + 20, 19 * 60 + 37],
+  [5 * 60 + 11, 19 * 60 + 57],
+  [5 * 60 + 24, 19 * 60 + 52],
+  [5 * 60 + 48, 19 * 60 + 22],
+  [6 * 60 + 12, 18 * 60 + 38],
+  [6 * 60 + 38, 17 * 60 + 52],
+  [7 * 60 + 8, 17 * 60 + 20],
+  [7 * 60 + 36, 17 * 60 + 17],
+];
+
+export function seoulTimeOfDay(ts: number): TimeId {
+  const parts = seoulClock.formatToParts(new Date(ts));
+  const pick = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((part) => part.type === type)?.value ?? "0");
+  const sun = SEOUL_SUN[pick("month") - 1] ?? SEOUL_SUN[0];
+  const minutes = pick("hour") * 60 + pick("minute");
+  const rise = sun[0];
+  const set = sun[1];
+  if (minutes >= rise - 40 && minutes < rise + 25) return "dawn";
+  if (minutes >= set - 30 && minutes < set + 40) return "dusk";
+  if (minutes >= rise + 25 && minutes < set - 30) return "day";
+  return "night";
+}
+
 export function seoulDate(ts: number): string {
   return dayFormat.format(new Date(ts));
 }

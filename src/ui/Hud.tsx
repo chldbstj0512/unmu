@@ -5,7 +5,6 @@ import { input } from "../experience/input.ts";
 import { getWorldSnap, subscribeWorld } from "../experience/bridge.ts";
 import { visualFor } from "../experience/atmosphere.ts";
 import {
-  cycleTime,
   interact,
   setHelp,
   setRain,
@@ -64,10 +63,13 @@ export function Hud() {
         <Button variant="overlay" size="icon" aria-label={sound ? "소리 끄기" : "소리 켜기"} onClick={toggleSound}>
           {sound ? <Volume2 /> : <VolumeX />}
         </Button>
-        <Button variant="overlay" size="sm" aria-label={`시각 ${visual.label}`} onClick={cycleTime}>
+        <span
+          className="inline-flex h-8 items-center gap-2 rounded-md border border-white/25 bg-black/35 px-3 text-xs text-[#f6efe2] backdrop-blur-md"
+          title="한국 시각에 맞춘 하늘"
+        >
           <Icon className="h-4 w-4" />
           {visual.label}
-        </Button>
+        </span>
       </div>
       <div className="pointer-events-auto absolute bottom-3 left-3 hidden max-w-xs text-xs leading-5 text-[#f6efe2]/80 sm:block">
         <button type="button" className="underline-offset-4 hover:underline" onClick={() => setHelp(true)}>

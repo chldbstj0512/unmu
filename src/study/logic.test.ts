@@ -6,6 +6,7 @@ import {
   prevDay,
   reduce,
   seoulDate,
+  seoulTimeOfDay,
   streak,
   todaySeconds,
   weekTotals,
@@ -16,6 +17,16 @@ const noon = Date.parse("2026-11-26T03:00:00.000Z");
 test("seoul date follows Asia/Seoul", () => {
   assert.equal(seoulDate(noon), "2026-11-26");
   assert.equal(seoulDate(Date.parse("2026-11-25T14:30:00.000Z")), "2026-11-25");
+});
+
+test("seoul sky follows the month's sunrise and sunset", () => {
+  assert.equal(seoulTimeOfDay(Date.parse("2026-11-27T00:06:00+09:00")), "night");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-11-26T07:20:00+09:00")), "dawn");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-11-26T12:00:00+09:00")), "day");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-11-26T17:10:00+09:00")), "dusk");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-06-21T05:20:00+09:00")), "dawn");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-06-21T04:00:00+09:00")), "night");
+  assert.equal(seoulTimeOfDay(Date.parse("2026-06-21T20:20:00+09:00")), "dusk");
 });
 
 test("prevDay crosses month boundaries", () => {
