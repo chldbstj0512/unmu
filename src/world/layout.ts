@@ -91,7 +91,7 @@ export const POND = { x: 13.2, z: 15.2, rx: 5.5, rz: 3.55 };
 export const DECK: Platform = { minX: 11.3, maxX: 15.1, minZ: 10.25, maxZ: 12.35, y: 0.12 };
 export const BELL = { x: 6.5, z: 8.2 };
 export const PAGODA = { x: -4.7, z: 3.5 };
-export const SPAWN = { x: 0, z: 16.2, yaw: 0 };
+export const YARD = { x: 0, z: 16.2 };
 export const BOUNDS = { minX: -22.7, maxX: 22.7, minZ: -22.7, maxZ: 23.5 };
 
 export const LANTERNS = [
@@ -126,6 +126,11 @@ export function facingYaw(b: Building): number {
   const dz = -x * s + z * c;
   return Math.atan2(-dx, -dz);
 }
+
+// Standing inside the study, in front of the leftmost cushion, looking at that desk.
+const spawnRoom = building("study");
+const [spawnX, spawnZ] = worldXZ(spawnRoom, DESK_X[0], 0.35);
+export const SPAWN = { x: spawnX, z: spawnZ, yaw: facingYaw(spawnRoom), pitch: -0.14 };
 
 export function localWalls(b: Building): Aabb[] {
   const hw = b.width / 2;

@@ -9,6 +9,7 @@ import {
   BUILDINGS,
   EYE,
   PLAYER_R,
+  SPAWN,
   SPOTS,
   ZONES,
   blocked,
@@ -65,9 +66,9 @@ export function Player() {
   const seatedRef = useRef(seatedId);
   enteredRef.current = entered;
   seatedRef.current = seatedId;
-  const pos = useRef({ x: 0, y: EYE, z: 16.2 });
-  const yaw = useRef(0);
-  const pitch = useRef(-0.04);
+  const pos = useRef({ x: SPAWN.x, y: EYE, z: SPAWN.z });
+  const yaw = useRef(SPAWN.yaw);
+  const pitch = useRef(SPAWN.pitch);
   const bob = useRef(0);
   const reduced = useRef(false);
   const seatAim = useRef<string | null>(null);

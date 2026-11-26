@@ -1,4 +1,4 @@
-import type { Zone } from "../world/layout.ts";
+import { SPAWN, type Zone } from "../world/layout.ts";
 
 export type Travel = { x: number; z: number; yaw: number; pitch?: number };
 
@@ -8,7 +8,7 @@ let snap: Snap = { nearby: null, place: "마당" };
 const listeners = new Set<() => void>();
 
 export const bridge = {
-  player: { x: 0, y: 1.58, z: 16.2, yaw: 0, ground: 0, seated: false, bob: 0 },
+  player: { x: SPAWN.x, y: 1.58, z: SPAWN.z, yaw: SPAWN.yaw, ground: 0, seated: false, bob: 0 },
   travel: null as Travel | null,
   ringUntil: 0,
   publish(next: Snap) {

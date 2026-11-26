@@ -10,6 +10,7 @@ import {
   SEAT_Z,
   SPAWN,
   SPOTS,
+  YARD,
   ZONES,
   blocked,
   building,
@@ -45,6 +46,26 @@ test("spawn, spots, and seats stay out of walls", () => {
   }
 });
 
+test("the day starts in front of the personal cushion", () => {
+  const study = building("study");
+  assert.equal(placeAt(SPAWN.x, SPAWN.z), "선방");
+  assert.equal(blocked(SPAWN.x, SPAWN.z), false);
+  assert.ok(Math.abs(groundY(SPAWN.x, SPAWN.z) - study.platform) < 1e-6);
+  const [seatX, seatZ] = worldXZ(study, DESK_X[0], SEAT_Z);
+  const aheadX = seatX - SPAWN.x;
+  const aheadZ = seatZ - SPAWN.z;
+  const fx = -Math.sin(SPAWN.yaw);
+  const fz = -Math.cos(SPAWN.yaw);
+  assert.ok(aheadX * fx + aheadZ * fz > 0.8);
+  assert.ok(Math.hypot(aheadX, aheadZ) > 1.45);
+  const [nextX, nextZ] = worldXZ(study, DESK_X[1], SEAT_Z);
+  assert.ok(Math.hypot(aheadX, aheadZ) < Math.hypot(nextX - SPAWN.x, nextZ - SPAWN.z));
+  const [aisleX, aisleZ] = worldXZ(study, 0, 0.35);
+  const [doorX, doorZ] = worldXZ(study, 0, study.depth / 2 + 1);
+  walk(SPAWN.x, SPAWN.z, aisleX, aisleZ);
+  walk(aisleX, aisleZ, doorX, doorZ);
+});
+
 test("paths connect the yard to each room", () => {
   const study = SPOTS.find((spot) => spot.id === "study");
   const hall = SPOTS.find((spot) => spot.id === "main");
@@ -52,7 +73,7 @@ test("paths connect the yard to each room", () => {
   const bell = SPOTS.find((spot) => spot.id === "bell");
   const pond = SPOTS.find((spot) => spot.id === "pond");
   assert.ok(study && hall && tea && bell && pond);
-  walk(SPAWN.x, SPAWN.z, 0, -12.4);
+  walk(YARD.x, YARD.z, 0, -12.4);
   walk(0, 0.2, study.x, study.z);
   walk(0, 4, hall.x, hall.z);
   walk(0, 6.4, tea.x, tea.z);
@@ -69,7 +90,7 @@ test("floors and the deck have the right height", () => {
   assert.ok(Math.abs(groundY(hall.x, hall.z) - hall.platform) < 1e-6);
   const tea = building("tea");
   assert.ok(Math.abs(groundY(tea.x, tea.z) - tea.platform) < 1e-6);
-  assert.equal(groundY(SPAWN.x, SPAWN.z), 0);
+  assert.equal(groundY(YARD.x, YARD.z), 0);
   assert.equal(groundY(13.15, 10.72), DECK.y);
   assert.equal(groundY(0, 4), 0);
 });
