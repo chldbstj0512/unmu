@@ -55,7 +55,7 @@ function badgeTexture(school: string, department: string) {
   g.font = '600 42px "Nanum Myeongjo", serif';
   g.textAlign = "center";
   g.textBaseline = "middle";
-  arcText(g, school || "구름결", 198);
+  arcText(g, school || "운무암", 198);
   g.fillStyle = "#1e3568";
   g.font = '700 64px "Nanum Myeongjo", serif';
   const dept = department || "수험";

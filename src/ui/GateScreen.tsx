@@ -19,11 +19,11 @@ export function GateScreen() {
     <div className="pointer-events-none fixed inset-0 z-40 flex items-end justify-center p-3 sm:items-center sm:justify-start sm:p-8 md:p-12">
       <section className="hanji pointer-events-auto max-h-[min(720px,calc(100dvh-1.5rem))] w-full max-w-[440px] overflow-auto rounded-2xl border border-[#e3e0da] p-6 sm:p-8">
         <div>
-          <p className="text-xs font-medium text-[#8a7568]">공부 공간</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#241c14]">구름결</h1>
+          <p className="text-xs font-medium text-[#8a7568]">나의 공부 공간</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#241c14]">운무암</h1>
         </div>
         <p className="mt-4 text-sm leading-7 text-[#4e463f]">
-          앉은 시간과 배운 것이 겹으로 남아 내 것이 된다.
+          운무암은 사람마다 하나씩이다. 문을 열면 내 마당이다.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-3">
           <label className="block text-sm text-[#6b5c4a]" htmlFor="school">
