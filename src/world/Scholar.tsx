@@ -32,7 +32,11 @@ function badgeTexture(school: string, department: string) {
   const g = canvas.getContext("2d");
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.anisotropy = 1;
+  texture.premultiplyAlpha = false;
   if (!g) return texture;
   g.clearRect(0, 0, 512, 512);
   g.fillStyle = "#f7f4ee";

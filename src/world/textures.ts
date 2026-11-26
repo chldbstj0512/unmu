@@ -4,6 +4,58 @@ import { GROUND_HALF, POND } from "./layout.ts";
 let tile: THREE.CanvasTexture | null = null;
 let ground: THREE.CanvasTexture | null = null;
 
+// Some drivers turn gl.generateMipmap of an sRGB canvas into colored static.
+// That static only shows up once the ground is far enough to use those levels,
+// so it reads as a thin sheet with a hard edge. Build the levels on the CPU.
+function sealOpaque(canvas: HTMLCanvasElement) {
+  const g = canvas.getContext("2d");
+  if (!g) return;
+  const image = g.getImageData(0, 0, canvas.width, canvas.height);
+  const data = image.data;
+  for (let i = 3; i < data.length; i += 4) data[i] = 255;
+  g.putImageData(image, 0, 0);
+}
+
+function mipChain(source: HTMLCanvasElement) {
+  const levels: HTMLCanvasElement[] = [source];
+  let width = source.width;
+  let height = source.height;
+  let current = source;
+  while (width > 1 || height > 1) {
+    width = Math.max(1, width >> 1);
+    height = Math.max(1, height >> 1);
+    const next = document.createElement("canvas");
+    next.width = width;
+    next.height = height;
+    const g = next.getContext("2d");
+    if (!g) break;
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = "high";
+    g.drawImage(current, 0, 0, width, height);
+    levels.push(next);
+    current = next;
+  }
+  return levels;
+}
+
+function finish(canvas: HTMLCanvasElement, repeat: boolean) {
+  sealOpaque(canvas);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mipmaps = mipChain(canvas);
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 1;
+  texture.premultiplyAlpha = false;
+  if (repeat) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  }
+  texture.needsUpdate = true;
+  return texture;
+}
+
 function tileTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = 128;
@@ -25,12 +77,7 @@ function tileTexture() {
       g.fillRect(x + 2, y + 26, 28, 5);
     }
   }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
-  return texture;
+  return finish(canvas, true);
 }
 
 function groundTexture() {
@@ -49,16 +96,16 @@ function groundTexture() {
   const wash = (x: number, z: number, rx: number, rz: number, color: string) => {
     const gradient = g.createRadialGradient(toX(x), toY(z), 4, toX(x), toY(z), Math.max(rx, rz));
     gradient.addColorStop(0, color);
-    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    gradient.addColorStop(1, "#6d7864");
     g.fillStyle = gradient;
     g.beginPath();
     g.ellipse(toX(x), toY(z), rx, rz, 0, 0, Math.PI * 2);
     g.fill();
   };
-  wash(0, 2, 280, 240, "rgba(139, 134, 116, 0.95)");
-  wash(-8, -6, 140, 120, "rgba(122, 116, 98, 0.45)");
-  wash(10, 8, 160, 110, "rgba(150, 144, 124, 0.4)");
-  wash(-14, 10, 120, 90, "rgba(92, 104, 84, 0.35)");
+  wash(0, 2, 280, 240, "#8b8674");
+  wash(-8, -6, 140, 120, "#8a846f");
+  wash(10, 8, 160, 110, "#918b78");
+  wash(-14, 10, 120, 90, "#6a7564");
 
   g.fillStyle = "#6a6558";
   g.fillRect(toX(-1.55), toY(-12.2), toX(1.55) - toX(-1.55), toY(19.2) - toY(-12.2));
@@ -86,13 +133,7 @@ function groundTexture() {
   g.ellipse(toX(POND.x), toY(POND.z), (POND.rx / (half * 2)) * size, (POND.rz / (half * 2)) * size, 0, 0, Math.PI * 2);
   g.fill();
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.generateMipmaps = true;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
-  texture.magFilter = THREE.LinearFilter;
-  texture.anisotropy = 16;
-  return texture;
+  return finish(canvas, false);
 }
 
 export function textures() {

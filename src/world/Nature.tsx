@@ -226,6 +226,10 @@ function Mist({ amount }: { amount: number }) {
     g.fillStyle = gradient;
     g.fillRect(0, 0, 128, 128);
     next.colorSpace = THREE.SRGBColorSpace;
+    next.generateMipmaps = false;
+    next.minFilter = THREE.LinearFilter;
+    next.magFilter = THREE.LinearFilter;
+    next.needsUpdate = true;
     return next;
   }, []);
   const group = useRef<THREE.Group>(null);
