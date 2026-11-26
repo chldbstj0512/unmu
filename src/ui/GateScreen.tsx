@@ -19,11 +19,11 @@ export function GateScreen() {
     <div className="pointer-events-none fixed inset-0 z-40 flex items-end justify-center p-3 sm:items-center sm:justify-start sm:p-8 md:p-12">
       <section className="hanji pointer-events-auto max-h-[min(720px,calc(100dvh-1.5rem))] w-full max-w-[440px] overflow-auto rounded-2xl border border-[#e3e0da] p-6 sm:p-8">
         <div>
-          <p className="text-xs font-medium text-[#8a7568]">공부 공간</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#241c14]">운무</h1>
+          <p className="text-xs font-medium text-[#8a7568]">시간을 쌓는 공부</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#241c14]">한겹씩</h1>
         </div>
         <p className="mt-4 text-sm leading-7 text-[#4e463f]">
-          오늘 볼 분량을 적고 들어간다. 자리는 조용하고, 기록은 이 화면에 남는다.
+          부족한 개념은 한 겹씩 쌓여야 내 것이 된다. 앉은 시간은 그 겹으로 남는다.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-3">
           <label className="block text-sm text-[#6b5c4a]" htmlFor="school">
