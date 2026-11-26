@@ -68,7 +68,7 @@ export function Hud() {
         <p className="text-sm">{world.place}</p>
         <Toast toast={toast} />
       </div>
-      <div className="pointer-events-auto absolute right-3 top-3 z-20 flex gap-2 sm:right-4 sm:top-4">
+      <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-4 sm:top-4">
         <Button variant="overlay" size="icon" aria-label={rain ? "비 그치기" : "비 내리기"} onClick={() => setRain(!rain)}>
           <CloudRain className={rain ? "text-[#d5e4f2]" : "opacity-70"} />
         </Button>
@@ -76,10 +76,10 @@ export function Hud() {
           {sound ? <Volume2 /> : <VolumeX />}
         </Button>
         <span
-          className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-md border border-white/25 bg-black/35 px-3 text-xs tabular-nums text-[#f6efe2] backdrop-blur-md"
+          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md border border-white/25 bg-black/35 px-3 text-sm tabular-nums text-[#f6efe2] backdrop-blur-md"
           title={visual.label}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="size-6" />
           {stamp}
         </span>
       </div>
