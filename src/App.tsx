@@ -45,7 +45,6 @@ const WorldCanvas = memo(function WorldCanvas() {
   return (
     <Boundary>
       <Canvas
-        shadows
         dpr={[1, 1.5]}
         camera={{ fov: 60, near: 0.1, far: 220, position: [0.2, 2.55, 18.6] }}
         gl={{ antialias: false, powerPreference: "high-performance" }}

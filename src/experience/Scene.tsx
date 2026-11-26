@@ -40,22 +40,7 @@ function Lights({ visual }: { visual: ReturnType<typeof visualFor> }) {
     <>
       <ambientLight intensity={visual.ambient} color={visual.ambientColor} />
       <hemisphereLight color={visual.hemiSky} groundColor={visual.hemiGround} intensity={visual.hemi} />
-      <directionalLight
-        position={visual.sun}
-        intensity={visual.sunIntensity}
-        color={visual.sunColor}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-near={1}
-        shadow-camera-far={90}
-        shadow-camera-left={-34}
-        shadow-camera-right={34}
-        shadow-camera-top={34}
-        shadow-camera-bottom={-34}
-        shadow-bias={-0.0008}
-        shadow-normalBias={0.08}
-      />
+      <directionalLight position={visual.sun} intensity={visual.sunIntensity} color={visual.sunColor} />
     </>
   );
 }
