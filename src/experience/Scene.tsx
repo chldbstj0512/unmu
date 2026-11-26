@@ -1,7 +1,6 @@
-import { Suspense, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { EffectComposer, ToneMapping, Vignette } from "@react-three/postprocessing";
-import { ToneMappingMode } from "postprocessing";
+import { useEffect, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 import { ambience } from "../audio/ambience.ts";
 import { useStudy } from "../study/store.ts";
 import { Scholar } from "../world/Scholar.tsx";
@@ -35,6 +34,16 @@ function Ear() {
   return null;
 }
 
+function Picture() {
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    gl.shadowMap.enabled = false;
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = 1;
+  }, [gl]);
+  return null;
+}
+
 function Lights({ visual }: { visual: ReturnType<typeof visualFor> }) {
   return (
     <>
@@ -53,6 +62,7 @@ export function Scene() {
     <>
       <color attach="background" args={[visual.fog]} />
       <fog attach="fog" args={[visual.fog, visual.fogNear, visual.fogFar]} />
+      <Picture />
       <Sky visual={visual} />
       <Lights visual={visual} />
       <Temple visual={visual} wet={rain} />
@@ -60,12 +70,6 @@ export function Scene() {
       <Rain on={rain} />
       <Player />
       <Ear />
-      <Suspense fallback={null}>
-        <EffectComposer multisampling={0}>
-          <Vignette offset={0.24} darkness={0.62} />
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        </EffectComposer>
-      </Suspense>
     </>
   );
 }

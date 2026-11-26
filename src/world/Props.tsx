@@ -360,7 +360,7 @@ export function Gate() {
       <mesh position={[0, 3.28, 0]} geometry={roof} castShadow>
         <meshStandardMaterial color="#3e474e" roughness={0.8} />
       </mesh>
-      <Label text="시공간" position={[0, 2.55, 0.45]} />
+      <Label text="운무암" position={[0, 2.55, 0.45]} />
     </group>
   );
 }

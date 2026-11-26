@@ -25,24 +25,24 @@ function GreatTree() {
         <meshStandardMaterial color="#4a3022" roughness={1} />
       </mesh>
       <mesh position={[0, 6.15, 0]} castShadow>
-        <icosahedronGeometry args={[3.15, 1]} />
-        <meshStandardMaterial color="#2c5340" flatShading />
+        <sphereGeometry args={[3.05, 18, 14]} />
+        <meshStandardMaterial color="#2f5a42" roughness={1} />
       </mesh>
-      <mesh position={[1.7, 5.35, 0.5]} castShadow>
-        <icosahedronGeometry args={[2.05, 1]} />
-        <meshStandardMaterial color="#3d6b4c" flatShading />
+      <mesh position={[1.7, 5.45, 0.45]} castShadow>
+        <sphereGeometry args={[1.95, 16, 12]} />
+        <meshStandardMaterial color="#3d6b4c" roughness={1} />
       </mesh>
-      <mesh position={[-1.85, 5.5, -0.35]} castShadow>
-        <icosahedronGeometry args={[2.15, 1]} />
-        <meshStandardMaterial color="#356246" flatShading />
+      <mesh position={[-1.8, 5.55, -0.3]} castShadow>
+        <sphereGeometry args={[2.05, 16, 12]} />
+        <meshStandardMaterial color="#356246" roughness={1} />
       </mesh>
-      <mesh position={[0.25, 7.7, -0.2]} castShadow>
-        <icosahedronGeometry args={[2.25, 1]} />
-        <meshStandardMaterial color="#4e7c56" flatShading />
+      <mesh position={[0.2, 7.55, -0.15]} castShadow>
+        <sphereGeometry args={[2.05, 16, 12]} />
+        <meshStandardMaterial color="#4a7a52" roughness={1} />
       </mesh>
-      <mesh position={[-0.4, 5.15, 1.55]} castShadow>
-        <icosahedronGeometry args={[1.7, 1]} />
-        <meshStandardMaterial color="#2f5a42" flatShading />
+      <mesh position={[-0.35, 5.2, 1.5]} castShadow>
+        <sphereGeometry args={[1.6, 14, 10]} />
+        <meshStandardMaterial color="#2c5340" roughness={1} />
       </mesh>
     </group>
   );
