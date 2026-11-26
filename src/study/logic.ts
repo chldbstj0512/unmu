@@ -40,6 +40,7 @@ export type StudyState = {
   fade: boolean;
   tick: number;
   toast: Toast | null;
+  stones: string[];
 };
 
 export type Action =
@@ -169,7 +170,23 @@ export function defaultState(): StudyState {
     fade: false,
     tick: 0,
     toast: null,
+    stones: [],
   };
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+export function stoneDays(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const days = value.filter((item): item is string => typeof item === "string" && DAY.test(item));
+  return [...new Set(days)].sort().slice(-800);
+}
+
+export function addStone(days: string[], now: number): { days: string[]; added: boolean } {
+  const day = seoulDate(now);
+  if (days.includes(day)) return { days, added: false };
+  const next = [...days, day].sort();
+  return { days: next.length > 800 ? next.slice(next.length - 800) : next, added: true };
 }
 
 export function remainingSeconds(state: StudyState, now: number): number {

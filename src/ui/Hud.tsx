@@ -13,7 +13,7 @@ import {
   toggleSound,
   useStudy,
 } from "../study/store.ts";
-import { formatClock, formatSpan, remainingSeconds, seoulStamp, streak, todaySeconds } from "../study/logic.ts";
+import { formatClock, formatSpan, remainingSeconds, seoulDate, seoulStamp, streak, todaySeconds } from "../study/logic.ts";
 import { Minimap } from "./Minimap.tsx";
 
 function useCoarsePointer() {
@@ -54,6 +54,10 @@ export function Hud() {
   const rain = useStudy((state) => state.rain);
   const sound = useStudy((state) => state.sound);
   const toast = useStudy((state) => state.toast);
+  const stones = useStudy((state) => state.stones);
+  const stackedToday = stones.includes(seoulDate(Date.now()));
+  const verb =
+    world.nearby?.kind === "cairn" ? (stackedToday ? "오늘은 이미 얹었다" : "돌을 얹는다") : world.nearby?.verb;
   const visual = visualFor(timeOfDay, rain);
   const Icon = TIME_ICON[timeOfDay];
   const stamp = useSeoulStamp();
@@ -66,6 +70,7 @@ export function Hud() {
       <div className="absolute left-1/2 top-3 w-[min(280px,46vw)] -translate-x-1/2 text-center text-[#f6efe2] [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] sm:top-4">
         <p className="text-sm font-medium tracking-tight">운무암</p>
         <p className="text-sm">{world.place}</p>
+        {world.place === "광장" ? <p className="text-sm">{stones.length ? `돌 ${stones.length}개` : "하루 하나"}</p> : null}
         <Toast toast={toast} />
       </div>
       <div className="pointer-events-auto absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-4 sm:top-4">
@@ -91,7 +96,7 @@ export function Hud() {
       {world.nearby ? (
         <div className="pointer-events-auto absolute bottom-28 left-1/2 z-20 -translate-x-1/2 sm:bottom-8">
           <Button variant="overlay" size="lg" onClick={() => interact(world.nearby!)}>
-            {coarse ? world.nearby.verb : `E  ·  ${world.nearby.verb}`}
+            {coarse ? verb : `E  ·  ${verb}`}
           </Button>
         </div>
       ) : null}

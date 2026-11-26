@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  addStone,
   defaultState,
   formatClock,
   prevDay,
   reduce,
   seoulDate,
+  stoneDays,
   seoulStamp,
   seoulTimeOfDay,
   streak,
@@ -14,6 +16,19 @@ import {
 } from "./logic.ts";
 
 const noon = Date.parse("2026-11-26T03:00:00.000Z");
+
+test("a stone can be added once per Seoul day", () => {
+  const first = addStone([], Date.parse("2026-11-27T00:30:00+09:00"));
+  assert.equal(first.added, true);
+  assert.deepEqual(first.days, ["2026-11-27"]);
+  const again = addStone(first.days, Date.parse("2026-11-27T23:40:00+09:00"));
+  assert.equal(again.added, false);
+  assert.equal(again.days.length, 1);
+  const next = addStone(first.days, Date.parse("2026-11-28T00:05:00+09:00"));
+  assert.equal(next.added, true);
+  assert.deepEqual(next.days, ["2026-11-27", "2026-11-28"]);
+  assert.deepEqual(stoneDays(["2026-11-27", "nope", "2026-11-27", 3]), ["2026-11-27"]);
+});
 
 test("seoul date follows Asia/Seoul", () => {
   assert.equal(seoulDate(noon), "2026-11-26");

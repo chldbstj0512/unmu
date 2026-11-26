@@ -23,7 +23,7 @@ export function GateScreen() {
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-[#241c14]">운무암</h1>
         </div>
         <p className="mt-4 text-sm leading-7 text-[#4e463f]">
-          운무암은 사람마다 하나씩이다. 문을 열면 내 마당이다.
+          운무암은 사람마다 하나씩이다. 문 밖 광장은 함께 쓰는 자리다.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-3">
           <label className="block text-sm text-[#6b5c4a]" htmlFor="school">

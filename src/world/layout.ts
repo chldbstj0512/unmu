@@ -21,7 +21,7 @@ export type Building = {
   pavilion?: boolean;
 };
 
-export type ZoneKind = "desk" | "bell" | "breath" | "altar";
+export type ZoneKind = "desk" | "bell" | "breath" | "altar" | "cairn";
 
 export type Zone = {
   id: string;
@@ -93,13 +93,18 @@ export const BELL = { x: 6.5, z: 8.2 };
 export const PAGODA = { x: -4.7, z: 3.5 };
 export const YARD = { x: 0, z: 16.2 };
 export const SPAWN = { x: 0, z: 16.2, yaw: 0, pitch: -0.04 };
-export const BOUNDS = { minX: -22.7, maxX: 22.7, minZ: -22.7, maxZ: 23.5 };
+export const TREE = { x: 0, z: 40 };
+export const PLAZA = { x: 0, z: 40, r: 12 };
+export const CAIRN = { x: 1.05, z: 38.35 };
+export const BOUNDS = { minX: -22.7, maxX: 22.7, minZ: -22.7, maxZ: 51.4 };
 
 export const LANTERNS = [
   { x: 3.15, z: 3.55 },
   { x: -2.7, z: -3.15 },
   { x: -9.15, z: 2.7 },
   { x: 8.55, z: 12.85 },
+  { x: -3.4, z: 36.6 },
+  { x: 3.6, z: 37.2 },
 ] as const;
 
 export const DESK_X = [-3.45, -1.15, 1.15, 3.45] as const;
@@ -222,9 +227,16 @@ function compoundWalls(): Aabb[] {
     hWall(c.minZ, c.minX + t / 2, c.maxX - t / 2, t),
     hWall(c.maxZ, c.minX + t / 2, -gate, t),
     hWall(c.maxZ, gate, c.maxX - t / 2, t),
-    { minX: -6, maxX: 6, minZ: 24.15, maxZ: 24.65 },
   ];
 }
+
+export const PLAZA_WALLS: Aabb[] = [
+  vWall(2.4, 21.35, 31.2, 0.55),
+  vWall(-2.4, 21.35, 31.2, 0.55),
+  vWall(-14.6, 30.4, 52.2, 0.55),
+  vWall(14.6, 30.4, 52.2, 0.55),
+  hWall(52.2, -14.6, 14.6, 0.55),
+];
 
 function pillars(): Aabb[] {
   return [-PILLAR_X, PILLAR_X].map((x) => ({
@@ -253,6 +265,11 @@ function obstacles(): Aabb[] {
       minZ: BELL.z - 0.38,
       maxZ: BELL.z + 0.38,
     },
+    { minX: TREE.x - 0.72, maxX: TREE.x + 0.72, minZ: TREE.z - 0.72, maxZ: TREE.z + 0.72 },
+    { minX: CAIRN.x - 0.38, maxX: CAIRN.x + 0.38, minZ: CAIRN.z - 0.34, maxZ: CAIRN.z + 0.34 },
+    { minX: -5.95, maxX: -5.25, minZ: 40.15, maxZ: 41.85 },
+    { minX: 5.25, maxX: 5.95, minZ: 40.15, maxZ: 41.85 },
+    { minX: -0.9, maxX: 0.9, minZ: 44.55, maxZ: 45.15 },
   ];
   for (const lx of DESK_X) {
     boxes.push(worldAabb(study, lx - 0.58, lx + 0.58, DESK_Z - 0.28, DESK_Z + 0.28));
@@ -272,6 +289,7 @@ export const COMPOUND_WALLS: Aabb[] = compoundWalls();
 
 export const WALLS: Aabb[] = [
   ...COMPOUND_WALLS,
+  ...PLAZA_WALLS,
   ...pillars(),
   ...BUILDINGS.flatMap((item) => localWalls(item).map((wall) => worldAabb(item, wall.minX, wall.maxX, wall.minZ, wall.maxZ))),
   ...obstacles(),
@@ -341,6 +359,17 @@ function makeZones(): Zone[] {
       radius: 2.35,
       sit: false,
     },
+    {
+      id: "cairn",
+      kind: "cairn",
+      verb: "돌을 얹는다",
+      x: 0,
+      z: CAIRN.z - 2.15,
+      yaw: Math.PI,
+      eyeY: EYE,
+      radius: 2.35,
+      sit: false,
+    },
   ];
 }
 
@@ -358,6 +387,7 @@ function makeSpots(): Spot[] {
     { key: "4", id: "tea", name: "다실", x: teaX, z: teaZ, yaw: facingYaw(tea), pitch: -0.32 },
     { key: "5", id: "bell", name: "종루", x: BELL.x, z: BELL.z + 1.65, yaw: 0 },
     { key: "6", id: "pond", name: "연못", x: 13.15, z: 10.72, yaw: Math.PI },
+    { key: "7", id: "plaza", name: "광장", x: 0, z: CAIRN.z - 2.15, yaw: Math.PI, pitch: -0.34 },
     { key: "", id: "gate", name: "일주문", x: 0, z: 17.5, yaw: 0 },
   ];
 }
@@ -532,6 +562,8 @@ export function placeAt(x: number, z: number): string {
   const px = (x - POND.x) / POND.rx;
   const pz = (z - POND.z) / POND.rz;
   if (px * px + pz * pz < 1.35 || onDeck(x, z)) return "연못";
+  if (Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r) return "광장";
+  if (z > COMPOUND.maxZ + 1.5 && z < PLAZA.z && Math.abs(x) < 5) return "길";
   if (Math.hypot(x - PAGODA.x, z - PAGODA.z) < 2.3) return "석탑";
   if (z > 18.4) return "일주문";
   return "마당";

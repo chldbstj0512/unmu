@@ -5,11 +5,13 @@ import {
   type Action,
   type Session,
   type StudyState,
+  addStone,
   defaultState,
   formatClock,
   reduce,
   remainingSeconds,
   seoulTimeOfDay,
+  stoneDays,
 } from "./logic.ts";
 import type { Spot, Zone } from "../world/layout.ts";
 
@@ -61,6 +63,7 @@ function sanitize(raw: unknown): StudyState {
     endsAt,
     pausedRemaining: num(data.pausedRemaining, mode === "focus" ? focusSeconds : breakSeconds, 0, 180 * 60),
     segmentSeconds: num(data.segmentSeconds, mode === "focus" ? focusSeconds : breakSeconds, 60, 180 * 60),
+    stones: stoneDays(data.stones),
   };
 }
 
@@ -75,10 +78,10 @@ function readLocal() {
 
 function write(next: StudyState) {
   try {
-    const { intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds } = next;
+    const { intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds, stones } = next;
     localStorage.setItem(
       KEY,
-      JSON.stringify({ intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds }),
+      JSON.stringify({ intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds, stones }),
     );
   } catch {
     /* private mode or a full disk */
@@ -187,6 +190,10 @@ export function interact(zone: Zone) {
     commit({ ...state, seatedId: zone.id, sheetOpen: true }, false);
     return;
   }
+  if (zone.kind === "cairn") {
+    stackStone();
+    return;
+  }
   if (zone.kind === "bell") {
     ambience.bell();
     bridge.ringUntil = performance.now() + 4800;
@@ -200,6 +207,22 @@ export function interact(zone: Zone) {
   }
   document.exitPointerLock?.();
   commit({ ...state, vowOpen: true }, false);
+}
+
+export function stackStone(now = Date.now()) {
+  const next = addStone(state.stones, now);
+  if (!next.added) {
+    commit({ ...state, toast: { id: now, text: "오늘은 이미 돌을 얹었다." } }, false);
+    return;
+  }
+  commit(
+    {
+      ...state,
+      stones: next.days,
+      toast: { id: now, text: `돌을 얹었다. ${next.days.length}개.` },
+    },
+    true,
+  );
 }
 
 export function stand() {

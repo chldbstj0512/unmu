@@ -4,12 +4,14 @@ import {
   BELL,
   BOUNDS,
   BUILDINGS,
+  CAIRN,
   DECK,
   DESK_X,
   POND,
   SEAT_Z,
   SPAWN,
   SPOTS,
+  TREE,
   YARD,
   ZONES,
   blocked,
@@ -19,10 +21,12 @@ import {
   floorAabb,
   frameCamera,
   groundY,
+  nearestZone,
   placeAt,
   pushOutOfPond,
   worldXZ,
 } from "./layout.ts";
+import { cairnStones } from "./cairn.ts";
 
 function walk(x1: number, z1: number, x2: number, z2: number, step = 0.3) {
   const dx = x2 - x1;
@@ -140,4 +144,29 @@ test("a desk zone exists for every cushion", () => {
   const desks = ZONES.filter((zone) => zone.kind === "desk");
   assert.equal(desks.length, DESK_X.length);
   assert.ok(BUILDINGS.length >= 3);
+});
+
+test("the gate opens onto the plaza and the tree holds the cairn", () => {
+  const plaza = SPOTS.find((spot) => spot.id === "plaza");
+  assert.ok(plaza);
+  assert.equal(plaza.key, "7");
+  assert.equal(blocked(plaza.x, plaza.z), false);
+  assert.equal(placeAt(plaza.x, plaza.z), "광장");
+  assert.equal(nearestZone(plaza.x, plaza.z)?.kind, "cairn");
+  assert.equal(blocked(TREE.x, TREE.z), true);
+  assert.equal(blocked(CAIRN.x, CAIRN.z), true);
+  assert.equal(blocked(2.4, 26), true);
+  assert.equal(blocked(0, 26), false);
+  assert.equal(placeAt(0, 26), "길");
+  walk(YARD.x, YARD.z, plaza.x, plaza.z);
+});
+
+test("the cairn narrows as it grows and stops drawing past a day a month", () => {
+  assert.equal(cairnStones(0).length, 0);
+  const two = cairnStones(2);
+  assert.equal(two.length, 2);
+  assert.ok(two[1].y > two[0].y);
+  assert.ok(two[1].sx < two[0].sx);
+  assert.equal(cairnStones(80).length, 24);
+  assert.deepEqual(cairnStones(5), cairnStones(5));
 });
