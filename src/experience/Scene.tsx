@@ -76,7 +76,7 @@ export function Scene() {
       <Player />
       <Ear />
       <Suspense fallback={null}>
-        <EffectComposer multisampling={4}>
+        <EffectComposer multisampling={0}>
           <Vignette offset={0.24} darkness={0.62} />
           <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         </EffectComposer>

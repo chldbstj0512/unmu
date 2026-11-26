@@ -3,7 +3,6 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Visual } from "../experience/atmosphere.ts";
 import { GROUND_HALF, POND } from "./layout.ts";
-import { textures } from "./textures.ts";
 
 const PINES: Array<[number, number, number]> = [
   [-19.4, 0, -16.5],
@@ -107,10 +106,28 @@ function Mountains() {
 
 function Ground({ wet }: { wet: boolean }) {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
       <planeGeometry args={[GROUND_HALF * 2, GROUND_HALF * 2]} />
-      <meshStandardMaterial map={textures().ground} color={wet ? "#7d868c" : "#ffffff"} roughness={1} />
+      <meshLambertMaterial color={wet ? "#7a868c" : "#6d7864"} />
     </mesh>
+  );
+}
+
+function Paths() {
+  const strips = [
+    [0, -0.6, 3.1, 23.2],
+    [-5, 0.2, 14.4, 2.7],
+    [4.6, 6.35, 11.6, 2.4],
+  ] as const;
+  return (
+    <>
+      {strips.map(([x, z, w, d]) => (
+        <mesh key={`${x}-${z}`} rotation={[-Math.PI / 2, 0, 0]} position={[x, 0.02, z]}>
+          <planeGeometry args={[w, d]} />
+          <meshLambertMaterial color="#5c574c" />
+        </mesh>
+      ))}
+    </>
   );
 }
 
@@ -137,8 +154,6 @@ function Pond() {
             vec3 deep = vec3(0.04, 0.16, 0.18);
             vec3 lite = vec3(0.22, 0.46, 0.44);
             vec3 color = mix(deep, lite, 0.42 + 0.22 * wave);
-            float spark = smoothstep(0.965, 1.0, sin(uv.x * 11.0 + uTime) * sin(uv.y * 8.0 - uTime));
-            color += spark * 0.16;
             gl_FragColor = vec4(color, 0.94);
           }
         `,
@@ -304,6 +319,7 @@ export function Nature({ visual, wet }: { visual: Visual; wet: boolean }) {
     <>
       <Mountains />
       <Ground wet={wet} />
+      <Paths />
       <Pond />
       {PINES.map((position, index) => (
         <Pine key={index} position={position} scale={0.85 + (index % 3) * 0.12} />

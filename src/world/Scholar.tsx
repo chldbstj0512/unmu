@@ -118,6 +118,10 @@ export function Scholar() {
 
   return (
     <group ref={root}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.035, 0.05]}>
+        <circleGeometry args={[0.46, 24]} />
+        <meshBasicMaterial color="#1a120c" transparent opacity={0.28} depthWrite={false} />
+      </mesh>
       <group ref={rig}>
         <mesh ref={body} position={[0, 0.5, 0]} castShadow scale={[1, 0.92, 1]}>
           <sphereGeometry args={[0.46, 28, 22]} />
