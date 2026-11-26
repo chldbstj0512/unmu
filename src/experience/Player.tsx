@@ -6,11 +6,13 @@ import { bridge } from "./bridge.ts";
 import { getState, interact, setHelp, setSheet, stand, travelTo, useStudy } from "../study/store.ts";
 import {
   BOUNDS,
+  BUILDINGS,
   EYE,
   PLAYER_R,
   SPOTS,
   ZONES,
   blocked,
+  floorAabb,
   groundY,
   nearestZone,
   placeAt,
@@ -19,6 +21,30 @@ import {
 
 const STEP = 0.42;
 const LOOK = 0.00215;
+
+function inRoom(x: number, z: number) {
+  return BUILDINGS.some((item) => {
+    if (item.pavilion) return false;
+    const floor = floorAabb(item);
+    return x >= floor.minX && x <= floor.maxX && z >= floor.minZ && z <= floor.maxZ;
+  });
+}
+
+function pullCamera(x: number, z: number, tx: number, tz: number): [number, number] {
+  const dx = tx - x;
+  const dz = tz - z;
+  const n = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.22));
+  let lx = x;
+  let lz = z;
+  for (let i = 1; i <= n; i += 1) {
+    const nx = x + (dx * i) / n;
+    const nz = z + (dz * i) / n;
+    if (blocked(nx, nz, 0.18)) break;
+    lx = nx;
+    lz = nz;
+  }
+  return [lx, lz];
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -143,9 +169,7 @@ export function Player() {
       pos.current.x = travel.x;
       pos.current.z = travel.z;
       yaw.current = travel.yaw;
-      pitch.current = -0.06;
-      pos.current.y = groundY(pos.current.x, pos.current.z) + EYE;
-      pitch.current = travel.pitch ?? -0.06;
+      pitch.current = clamp(travel.pitch ?? -0.2, -0.7, 0.25);
       bridge.travel = null;
       snapped = true;
     }
@@ -157,12 +181,11 @@ export function Player() {
       const k = 1 - Math.pow(0.0015, delta);
       pos.current.x += (seated.x - pos.current.x) * k;
       pos.current.z += (seated.z - pos.current.z) * k;
-      pos.current.y += (seated.eyeY - pos.current.y) * k;
       yaw.current = dampAngle(yaw.current, seated.yaw, delta);
-      pitch.current += (-0.52 - pitch.current) * k;
+      pitch.current += (-0.34 - pitch.current) * k;
     } else if (!snapped) {
       yaw.current -= input.lookX * LOOK;
-      pitch.current = clamp(pitch.current + input.lookY * LOOK, -1.15, 1.15);
+      pitch.current = clamp(pitch.current + input.lookY * LOOK, -0.85, 0.45);
       input.lookX = 0;
       input.lookY = 0;
 
@@ -207,22 +230,29 @@ export function Player() {
       if (!blocked(bx, pos.current.z, PLAYER_R)) pos.current.x = bx;
       if (!blocked(pos.current.x, bz, PLAYER_R)) pos.current.z = bz;
 
-      const moving = Math.hypot(mx, mz) > 0.0004;
-      if (moving && !reduced.current) bob.current += delta * 8;
-      const bobY = moving && !reduced.current ? Math.sin(bob.current) * 0.018 : 0;
-      const targetY = groundY(pos.current.x, pos.current.z) + EYE + bobY;
-      pos.current.y += (targetY - pos.current.y) * (1 - Math.pow(0.001, delta));
+      if (Math.hypot(mx, mz) > 0.0004 && !reduced.current) bob.current += delta * 8;
     }
 
-    camera.position.set(pos.current.x, pos.current.y, pos.current.z);
-    camera.rotation.order = "YXZ";
-    camera.rotation.y = yaw.current;
-    camera.rotation.x = pitch.current;
-    camera.rotation.z = 0;
+    const gy = groundY(pos.current.x, pos.current.z);
+    const dist = seated ? 2.85 : inRoom(pos.current.x, pos.current.z) ? 2.6 : 4.5;
+    const side = seated ? 1.15 : 0.82;
+    const back = Math.cos(pitch.current) * dist;
+    const lift = -Math.sin(pitch.current) * dist;
+    const gx = Math.sin(yaw.current);
+    const gz = Math.cos(yaw.current);
+    const rx = Math.cos(yaw.current);
+    const rz = -Math.sin(yaw.current);
+    const [cx, cz] = pullCamera(pos.current.x, pos.current.z, pos.current.x + gx * back + rx * side, pos.current.z + gz * back + rz * side);
+    const floor = groundY(cx, cz);
+    camera.position.set(cx, Math.max(gy + 1.05 + lift, floor + 0.45), cz);
+    camera.lookAt(pos.current.x, gy + 1.02, pos.current.z);
     bridge.player.x = pos.current.x;
-    bridge.player.y = pos.current.y;
+    bridge.player.y = gy + 1.05;
     bridge.player.z = pos.current.z;
     bridge.player.yaw = yaw.current;
+    bridge.player.ground = gy;
+    bridge.player.seated = Boolean(seated);
+    bridge.player.bob = bob.current;
     bridge.publish({
       nearby: seated ? null : nearestZone(pos.current.x, pos.current.z),
       place: placeAt(pos.current.x, pos.current.z),

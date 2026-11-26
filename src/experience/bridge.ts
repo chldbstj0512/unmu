@@ -8,7 +8,7 @@ let snap: Snap = { nearby: null, place: "마당" };
 const listeners = new Set<() => void>();
 
 export const bridge = {
-  player: { x: 0, y: 1.58, z: 16.2, yaw: 0 },
+  player: { x: 0, y: 1.58, z: 16.2, yaw: 0, ground: 0, seated: false, bob: 0 },
   travel: null as Travel | null,
   ringUntil: 0,
   publish(next: Snap) {

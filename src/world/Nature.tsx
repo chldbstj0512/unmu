@@ -90,6 +90,8 @@ function Mountains() {
       let y = ridge * 0.38 + Math.max(0, noise) * 2.8 * Math.min(1, ridge / 12);
       const south = Math.max(0, z - 18);
       y *= 1 - Math.min(1, south / 28) * Math.exp(-(x * x) / 380) * 0.8;
+      if (radius < 34) y = -2.4;
+      else if (radius < 42) y = -2.4 * (1 - (radius - 34) / 8) + y * ((radius - 34) / 8);
       pos.setY(i, y);
     }
     geo.computeVertexNormals();
@@ -258,67 +260,38 @@ function Mist({ amount }: { amount: number }) {
   );
 }
 
-function Leaves() {
+function Fireflies({ on }: { on: boolean }) {
   const group = useRef<THREE.Group>(null);
   const seeds = useMemo(
     () =>
-      Array.from({ length: 22 }, (_, i) => ({
-        x: Math.sin(i * 2.2) * 16,
-        z: (i % 11) * 2.4 - 10,
-        speed: 0.18 + (i % 5) * 0.05,
-        phase: i * 0.7,
-        size: 0.07 + (i % 3) * 0.02,
-        color: i % 2 ? "#b8432c" : "#d07a32",
+      Array.from({ length: 14 }, (_, i) => ({
+        x: Math.sin(i * 1.7) * 11,
+        z: Math.cos(i * 1.3) * 9,
+        y: 0.7 + (i % 5) * 0.38,
+        p: i * 0.9,
       })),
     [],
   );
   useFrame(({ clock }) => {
-    const leaves = group.current;
-    if (!leaves) return;
+    const cloud = group.current;
+    if (!cloud) return;
     const t = clock.elapsedTime;
-    leaves.children.forEach((child, index) => {
+    cloud.children.forEach((child, index) => {
       const seed = seeds[index];
       if (!seed) return;
-      const y = 2.6 - ((t * seed.speed + seed.phase) % 2.8);
-      child.position.set(seed.x + Math.sin(t * 0.3 + seed.phase) * 0.7, Math.max(0.06, y), seed.z);
-      child.rotation.z = t * 0.7 + seed.phase;
+      child.position.set(seed.x + Math.sin(t * 0.5 + seed.p) * 0.6, seed.y + Math.sin(t * 1.3 + seed.p) * 0.45, seed.z + Math.cos(t * 0.35 + seed.p) * 0.6);
     });
-  });
-  return (
-    <group ref={group}>
-      {seeds.map((seed, index) => (
-        <mesh key={index} rotation={[-Math.PI / 2, 0, seed.phase]}>
-          <circleGeometry args={[seed.size, 5]} />
-          <meshStandardMaterial color={seed.color} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Fireflies({ on }: { on: boolean }) {
-  const points = useRef<THREE.Points>(null);
-  const seeds = useMemo(() => Array.from({ length: 40 }, (_, i) => ({ x: Math.sin(i * 1.3) * 12, z: Math.cos(i) * 10, p: i })), []);
-  const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(seeds.length * 3), 3));
-    return geo;
-  }, [seeds.length]);
-  useFrame(({ clock }) => {
-    const cloud = points.current;
-    const attr = geometry.getAttribute("position");
-    if (!cloud || !attr) return;
-    const t = clock.elapsedTime;
-    seeds.forEach((seed, index) => {
-      attr.setXYZ(index, seed.x + Math.sin(t * 0.6 + seed.p) * 0.8, 1.1 + Math.sin(t * 1.4 + seed.p) * 0.35, seed.z + Math.cos(t * 0.4 + seed.p));
-    });
-    attr.needsUpdate = true;
   });
   if (!on) return null;
   return (
-    <points ref={points} geometry={geometry}>
-      <pointsMaterial color="#ffe2a4" size={0.08} transparent opacity={0.85} depthWrite={false} />
-    </points>
+    <group ref={group}>
+      {seeds.map((seed, index) => (
+        <mesh key={index} position={[seed.x, seed.y, seed.z]}>
+          <sphereGeometry args={[0.035, 8, 8]} />
+          <meshStandardMaterial color="#ffe2a4" emissive="#ffd27a" emissiveIntensity={1.4} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -343,7 +316,6 @@ export function Nature({ visual, wet }: { visual: Visual; wet: boolean }) {
       <Rock position={[16.6, 0, 18.4]} scale={0.8} />
       <Rock position={[-8.8, 0, 8.6]} scale={0.4} />
       <Mist amount={visual.mist} />
-      <Leaves />
       <Fireflies on={visual.star > 0.45} />
     </>
   );

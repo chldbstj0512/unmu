@@ -56,7 +56,7 @@ export function Sky({ visual }: { visual: Visual }) {
     const arr = new Float32Array(360 * 3);
     for (let i = 0; i < 360; i += 1) {
       const theta = Math.random() * Math.PI * 2;
-      const y = 0.25 + Math.random() * 0.75;
+      const y = 0.62 + Math.random() * 0.38;
       const ring = Math.sqrt(1 - y * y);
       arr[i * 3] = Math.cos(theta) * ring * 140;
       arr[i * 3 + 1] = y * 140;
@@ -73,7 +73,7 @@ export function Sky({ visual }: { visual: Visual }) {
         <primitive object={material} attach="material" />
       </mesh>
       <points geometry={stars}>
-        <pointsMaterial color="#f7f1e4" size={1.15} sizeAttenuation transparent opacity={visual.star} depthWrite={false} fog={false} />
+        <pointsMaterial color="#f7f1e4" size={1.4} sizeAttenuation={false} transparent opacity={visual.star} depthWrite={false} />
       </points>
     </>
   );

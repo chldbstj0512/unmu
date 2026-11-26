@@ -14,6 +14,8 @@ export type Toast = { id: number; text: string };
 
 export type StudyState = {
   intention: string;
+  school: string;
+  department: string;
   goalSeconds: number;
   subject: string;
   note: string;
@@ -97,6 +99,8 @@ export function prevDay(ymd: string): string {
 export function defaultState(): StudyState {
   return {
     intention: "",
+    school: "",
+    department: "",
     goalSeconds: 4 * 3600,
     subject: "국어",
     note: "",

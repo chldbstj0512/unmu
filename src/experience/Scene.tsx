@@ -4,6 +4,7 @@ import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postp
 import { ToneMappingMode } from "postprocessing";
 import { ambience } from "../audio/ambience.ts";
 import { useStudy } from "../study/store.ts";
+import { Scholar } from "../world/Scholar.tsx";
 import { Temple } from "../world/Temple.tsx";
 import { POND, isInsideStudy } from "../world/layout.ts";
 import { visualFor } from "./atmosphere.ts";
@@ -52,8 +53,8 @@ function Lights({ visual }: { visual: ReturnType<typeof visualFor> }) {
         shadow-camera-right={34}
         shadow-camera-top={34}
         shadow-camera-bottom={-34}
-        shadow-bias={-0.0003}
-        shadow-normalBias={0.045}
+        shadow-bias={-0.0008}
+        shadow-normalBias={0.08}
       />
     </>
   );
@@ -70,6 +71,7 @@ export function Scene() {
       <Sky visual={visual} />
       <Lights visual={visual} />
       <Temple visual={visual} wet={rain} />
+      <Scholar />
       <Rain on={rain} />
       <Player />
       <Ear />

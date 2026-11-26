@@ -44,21 +44,21 @@ function groundTexture() {
   const toX = (x: number) => ((x + half) / (half * 2)) * size;
   const toY = (z: number) => ((z + half) / (half * 2)) * size;
 
-  g.fillStyle = "#66725f";
+  g.fillStyle = "#6d7864";
   g.fillRect(0, 0, size, size);
-  for (let i = 0; i < 28000; i += 1) {
-    g.fillStyle = i % 2 ? "#5c6756" : "#748270";
-    g.fillRect(Math.random() * size, Math.random() * size, 2, 2);
-  }
-
-  g.fillStyle = "#8b8674";
-  g.fillRect(toX(-22.6), toY(-22.6), toX(22.6) - toX(-22.6), toY(20.6) - toY(-22.6));
-  for (let i = 0; i < 18000; i += 1) {
-    const x = -22 + Math.random() * 44;
-    const z = -22 + Math.random() * 42;
-    g.fillStyle = Math.random() > 0.5 ? "#7d7868" : "#98927e";
-    g.fillRect(toX(x), toY(z), 2, 2);
-  }
+  const wash = (x: number, z: number, rx: number, rz: number, color: string) => {
+    const gradient = g.createRadialGradient(toX(x), toY(z), 4, toX(x), toY(z), Math.max(rx, rz));
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = gradient;
+    g.beginPath();
+    g.ellipse(toX(x), toY(z), rx, rz, 0, 0, Math.PI * 2);
+    g.fill();
+  };
+  wash(0, 2, 280, 240, "rgba(139, 134, 116, 0.95)");
+  wash(-8, -6, 140, 120, "rgba(122, 116, 98, 0.45)");
+  wash(10, 8, 160, 110, "rgba(150, 144, 124, 0.4)");
+  wash(-14, 10, 120, 90, "rgba(92, 104, 84, 0.35)");
 
   g.fillStyle = "#6a6558";
   g.fillRect(toX(-1.55), toY(-12.2), toX(1.55) - toX(-1.55), toY(19.2) - toY(-12.2));
@@ -88,7 +88,10 @@ function groundTexture() {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.anisotropy = 16;
   return texture;
 }
 

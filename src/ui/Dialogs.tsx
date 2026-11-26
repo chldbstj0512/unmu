@@ -107,8 +107,8 @@ export function HelpDialog() {
       <DialogContent>
         <DialogTitle className="font-serif text-2xl">암자에서</DialogTitle>
         <DialogDescription className="mt-2 text-sm leading-7 text-[#3d3228]">
-          걷기 WASD 또는 화살표. Shift는 천천히. 마당을 클릭한 뒤 마우스로 둘러보고, Esc로 손을 놓는다.
-          방석 앞에서 E, 또는 글을 누르면 앉는다. 지도의 이름이나 숫자 1부터 6으로 장소를 옮긴다.
+          걷기 WASD 또는 화살표. Shift는 천천히. 마당을 클릭하면 캐릭터 뒤를 둘러보고, Esc로 손을 놓는다.
+          방석 앞에서 E, 또는 글을 누르면 앉는다. 지도의 번호나 숫자 1부터 6으로 장소를 옮긴다.
         </DialogDescription>
         <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
           {SPOTS.filter((spot) => spot.key).map((spot) => (

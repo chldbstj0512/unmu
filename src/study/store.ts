@@ -49,6 +49,8 @@ function sanitize(raw: unknown): StudyState {
   return {
     ...base,
     intention: typeof data.intention === "string" ? data.intention.slice(0, 40) : "",
+    school: typeof data.school === "string" ? data.school.trim().slice(0, 24) : "",
+    department: typeof data.department === "string" ? data.department.trim().slice(0, 16) : "",
     goalSeconds: num(data.goalSeconds, base.goalSeconds, 3600, 14 * 3600),
     subject: typeof data.subject === "string" && data.subject.trim() ? data.subject.trim().slice(0, 16) : base.subject,
     note: typeof data.note === "string" ? data.note.slice(0, 500) : "",
@@ -77,10 +79,10 @@ function readLocal() {
 
 function write(next: StudyState) {
   try {
-    const { intention, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds } = next;
+    const { intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds } = next;
     localStorage.setItem(
       KEY,
-      JSON.stringify({ intention, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds }),
+      JSON.stringify({ intention, school, department, goalSeconds, subject, note, focusSeconds, breakSeconds, sessions, sound, rain, timeOfDay, mode, running, endsAt, pausedRemaining, segmentSeconds }),
     );
   } catch {
     /* private mode or a full disk */
@@ -160,10 +162,18 @@ export function stopTimer() {
   commit(reduce(state, { type: "stop" }, Date.now()), true);
 }
 
-export function enterWorld(intention: string, goalHours: number) {
+function label(value: string, max: number) {
+  return value.trim().slice(0, max);
+}
+
+export function setIdentity(school: string, department: string) {
+  commit({ ...state, school: label(school, 24), department: label(department, 16) }, true);
+}
+
+export function enterWorld(intention: string, goalHours: number, school: string, department: string) {
   ambience.unlock();
   const withVow = reduce(reduce(state, { type: "intention", intention }, Date.now()), { type: "goal", hours: goalHours }, Date.now());
-  commit({ ...withVow, entered: true, fade: true }, true);
+  commit({ ...withVow, school: label(school, 24), department: label(department, 16), entered: true, fade: true }, true);
   try {
     sessionStorage.setItem("unmuam.entered", "1");
   } catch {
