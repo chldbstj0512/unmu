@@ -85,6 +85,7 @@ const dayFormat = new Intl.DateTimeFormat("en-CA", {
 const seoulClock = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Asia/Seoul",
   month: "2-digit",
+  day: "2-digit",
   hour: "2-digit",
   minute: "2-digit",
   hourCycle: "h23",
@@ -117,6 +118,12 @@ export function seoulTimeOfDay(ts: number): TimeId {
   if (minutes >= set - 30 && minutes < set + 40) return "dusk";
   if (minutes >= rise + 25 && minutes < set - 30) return "day";
   return "night";
+}
+
+export function seoulStamp(ts: number): { date: string; time: string } {
+  const parts = seoulClock.formatToParts(new Date(ts));
+  const pick = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return { date: `${Number(pick("month"))}월 ${Number(pick("day"))}일`, time: `${pick("hour")}:${pick("minute")}` };
 }
 
 export function seoulDate(ts: number): string {

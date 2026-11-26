@@ -13,7 +13,7 @@ import {
   toggleSound,
   useStudy,
 } from "../study/store.ts";
-import { formatClock, formatSpan, remainingSeconds, streak, todaySeconds } from "../study/logic.ts";
+import { formatClock, formatSpan, remainingSeconds, seoulStamp, streak, todaySeconds } from "../study/logic.ts";
 import { Minimap } from "./Minimap.tsx";
 
 function useCoarsePointer() {
@@ -27,6 +27,17 @@ function useCoarsePointer() {
 
 function useWorld() {
   return useSyncExternalStore(subscribeWorld, getWorldSnap, getWorldSnap);
+}
+
+function useSeoulStamp() {
+  const subscribe = (onChange: () => void) => {
+    const id = window.setInterval(onChange, 1000);
+    return () => window.clearInterval(id);
+  };
+  return useSyncExternalStore(subscribe, () => {
+    const stamp = seoulStamp(Date.now());
+    return `${stamp.date} ${stamp.time}`;
+  }, () => "");
 }
 
 const TIME_ICON = {
@@ -45,6 +56,7 @@ export function Hud() {
   const toast = useStudy((state) => state.toast);
   const visual = visualFor(timeOfDay, rain);
   const Icon = TIME_ICON[timeOfDay];
+  const stamp = useSeoulStamp();
 
   return (
     <div className="pointer-events-none fixed inset-0 z-30">
@@ -64,11 +76,11 @@ export function Hud() {
           {sound ? <Volume2 /> : <VolumeX />}
         </Button>
         <span
-          className="inline-flex h-8 items-center gap-2 rounded-md border border-white/25 bg-black/35 px-3 text-xs text-[#f6efe2] backdrop-blur-md"
-          title="한국 시각에 맞춘 하늘"
+          className="inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-md border border-white/25 bg-black/35 px-3 text-xs tabular-nums text-[#f6efe2] backdrop-blur-md"
+          title={visual.label}
         >
           <Icon className="h-4 w-4" />
-          {visual.label}
+          {stamp}
         </span>
       </div>
       <div className="pointer-events-auto absolute bottom-3 left-3 hidden max-w-xs text-xs leading-5 text-[#f6efe2]/80 sm:block">

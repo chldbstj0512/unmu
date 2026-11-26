@@ -6,6 +6,7 @@ import {
   prevDay,
   reduce,
   seoulDate,
+  seoulStamp,
   seoulTimeOfDay,
   streak,
   todaySeconds,
@@ -17,6 +18,11 @@ const noon = Date.parse("2026-11-26T03:00:00.000Z");
 test("seoul date follows Asia/Seoul", () => {
   assert.equal(seoulDate(noon), "2026-11-26");
   assert.equal(seoulDate(Date.parse("2026-11-25T14:30:00.000Z")), "2026-11-25");
+});
+
+test("seoul stamp is the Korean date and 24-hour time", () => {
+  assert.deepEqual(seoulStamp(Date.parse("2026-11-27T00:11:00+09:00")), { date: "11월 27일", time: "00:11" });
+  assert.deepEqual(seoulStamp(Date.parse("2026-06-21T19:05:00+09:00")), { date: "6월 21일", time: "19:05" });
 });
 
 test("seoul sky follows the month's sunrise and sunset", () => {
