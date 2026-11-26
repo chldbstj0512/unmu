@@ -14,6 +14,7 @@ import {
   ZONES,
   blocked,
   floorAabb,
+  frameCamera,
   groundY,
   nearestZone,
   placeAt,
@@ -29,22 +30,6 @@ function inRoom(x: number, z: number) {
     const floor = floorAabb(item);
     return x >= floor.minX && x <= floor.maxX && z >= floor.minZ && z <= floor.maxZ;
   });
-}
-
-function pullCamera(x: number, z: number, tx: number, tz: number): [number, number] {
-  const dx = tx - x;
-  const dz = tz - z;
-  const n = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.22));
-  let lx = x;
-  let lz = z;
-  for (let i = 1; i <= n; i += 1) {
-    const nx = x + (dx * i) / n;
-    const nz = z + (dz * i) / n;
-    if (blocked(nx, nz, 0.18)) break;
-    lx = nx;
-    lz = nz;
-  }
-  return [lx, lz];
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -266,19 +251,17 @@ export function Player() {
       if (Math.hypot(mx, mz) > 0.0004 && !reduced.current) bob.current += delta * 8;
     }
 
+    if (!Number.isFinite(yaw.current) || !Number.isFinite(pitch.current)) {
+      yaw.current = SPAWN.yaw;
+      pitch.current = SPAWN.pitch;
+    }
     const gy = groundY(pos.current.x, pos.current.z);
     const dist = seated ? 2.85 : inRoom(pos.current.x, pos.current.z) ? 2.6 : 4.5;
     const side = seated ? 1.15 : 0.82;
-    const back = Math.cos(pitch.current) * dist;
-    const lift = -Math.sin(pitch.current) * dist;
-    const gx = Math.sin(yaw.current);
-    const gz = Math.cos(yaw.current);
-    const rx = Math.cos(yaw.current);
-    const rz = -Math.sin(yaw.current);
-    const [cx, cz] = pullCamera(pos.current.x, pos.current.z, pos.current.x + gx * back + rx * side, pos.current.z + gz * back + rz * side);
-    const floor = groundY(cx, cz);
-    camera.position.set(cx, Math.max(gy + 1.05 + lift, floor + 0.45), cz);
-    camera.lookAt(pos.current.x, gy + 1.02, pos.current.z);
+    const pose = frameCamera(pos.current.x, pos.current.z, gy, yaw.current, pitch.current, dist, side);
+    camera.up.set(0, 1, 0);
+    camera.position.set(pose.x, pose.y, pose.z);
+    camera.lookAt(pos.current.x, pose.lookY, pos.current.z);
     bridge.player.x = pos.current.x;
     bridge.player.y = gy + 1.05;
     bridge.player.z = pos.current.z;

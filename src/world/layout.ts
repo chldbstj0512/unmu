@@ -428,6 +428,105 @@ export function nearestZone(x: number, z: number): Zone | null {
   return best;
 }
 
+function march(x: number, z: number, tx: number, tz: number): [number, number] {
+  const dx = tx - x;
+  const dz = tz - z;
+  const n = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.22));
+  let lx = x;
+  let lz = z;
+  for (let i = 1; i <= n; i += 1) {
+    const nx = x + (dx * i) / n;
+    const nz = z + (dz * i) / n;
+    if (blocked(nx, nz, 0.18)) break;
+    lx = nx;
+    lz = nz;
+  }
+  return [lx, lz];
+}
+
+export function ceilingY(x: number, z: number): number | null {
+  for (const item of BUILDINGS) {
+    const floor = floorAabb(item);
+    if (x >= floor.minX && x <= floor.maxX && z >= floor.minZ && z <= floor.maxZ) return item.platform + item.wallHeight;
+  }
+  return null;
+}
+
+function lampAt(b: Building, lx: number, lz: number, y: number) {
+  const [x, z] = worldXZ(b, lx, lz);
+  return { x, y, z };
+}
+
+const LAMPS = [
+  lampAt(study, 0, -0.4, study.platform + 1.7),
+  lampAt(mainHall, 0, -1, mainHall.platform + 1.8),
+  ...LANTERNS.map((item) => ({ x: item.x, y: 1.08, z: item.z })),
+];
+
+export function frameCamera(px: number, pz: number, gy: number, yaw: number, pitch: number, dist: number, side: number) {
+  const lookY = gy + 1.02;
+  if (![px, pz, gy, yaw, pitch, dist, side].every(Number.isFinite)) {
+    return { x: px, y: gy + 2.1, z: pz + 0.8, lookY };
+  }
+  const back = Math.cos(pitch) * dist;
+  const lift = -Math.sin(pitch) * dist;
+  const gx = Math.sin(yaw);
+  const gz = Math.cos(yaw);
+  const rx = Math.cos(yaw);
+  const rz = -Math.sin(yaw);
+  let [x, z] = march(px, pz, px + gx * back + rx * side, pz + gz * back + rz * side);
+  let y = Math.max(gy + 1.05 + lift, groundY(x, z) + 0.55);
+  const underRoof = () => {
+    const cap = ceilingY(x, z);
+    if (cap != null) y = Math.min(y, cap - 0.28);
+  };
+  underRoof();
+  for (const lamp of LAMPS) {
+    const dx = x - lamp.x;
+    const dy = y - lamp.y;
+    const dz = z - lamp.z;
+    const d = Math.hypot(dx, dy, dz);
+    const keep = 1.25;
+    if (d >= keep || d < 1e-4) continue;
+    const scale = keep / d;
+    const nx = lamp.x + dx * scale;
+    const nz = lamp.z + dz * scale;
+    if (blocked(nx, nz, 0.18)) continue;
+    x = nx;
+    z = nz;
+    y = lamp.y + dy * scale;
+    underRoof();
+  }
+  if (Math.hypot(x - px, y - lookY, z - pz) < 1.05) {
+    y = Math.max(y, lookY + 1.15);
+    underRoof();
+  }
+  if (Math.hypot(x - px, y - lookY, z - pz) < 0.9) {
+    let best = -Infinity;
+    let bx = x;
+    let bz = z;
+    for (let i = 0; i < 8; i += 1) {
+      const a = (i / 8) * Math.PI * 2;
+      const nx = px + Math.cos(a) * 0.85;
+      const nz = pz + Math.sin(a) * 0.85;
+      if (blocked(nx, nz, 0.18)) continue;
+      const score = Math.cos(a) * gx + Math.sin(a) * gz;
+      if (score > best) {
+        best = score;
+        bx = nx;
+        bz = nz;
+      }
+    }
+    if (best > -Infinity) {
+      x = bx;
+      z = bz;
+      y = Math.max(y, lookY + 0.4);
+      underRoof();
+    }
+  }
+  return { x, y, z, lookY };
+}
+
 export function placeAt(x: number, z: number): string {
   for (const item of BUILDINGS) {
     const floor = floorAabb(item);

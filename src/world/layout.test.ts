@@ -14,8 +14,10 @@ import {
   ZONES,
   blocked,
   building,
+  ceilingY,
   facingYaw,
   floorAabb,
+  frameCamera,
   groundY,
   placeAt,
   pushOutOfPond,
@@ -64,6 +66,21 @@ test("the day starts in front of the personal cushion", () => {
   const [doorX, doorZ] = worldXZ(study, 0, study.depth / 2 + 1);
   walk(SPAWN.x, SPAWN.z, aisleX, aisleZ);
   walk(aisleX, aisleZ, doorX, doorZ);
+});
+
+test("turning indoors cannot put the camera in the head or the roof", () => {
+  const gy = groundY(SPAWN.x, SPAWN.z);
+  for (let yaw = 0; yaw < Math.PI * 2; yaw += 0.35) {
+    for (const pitch of [-0.85, -0.2, 0.45]) {
+      const cam = frameCamera(SPAWN.x, SPAWN.z, gy, yaw, pitch, 2.6, 0.82);
+      const gap = Math.hypot(cam.x - SPAWN.x, cam.y - (gy + 1.02), cam.z - SPAWN.z);
+      assert.ok(gap > 0.9, `gap ${gap.toFixed(2)} at yaw ${yaw.toFixed(2)} pitch ${pitch}`);
+      const cap = ceilingY(cam.x, cam.z);
+      if (cap != null) assert.ok(cam.y < cap - 0.1, `camera ${cam.y.toFixed(2)} roof ${cap.toFixed(2)}`);
+    }
+  }
+  const raised = frameCamera(SPAWN.x, SPAWN.z, gy, SPAWN.yaw, -0.85, 2.6, 0.82);
+  assert.ok(raised.y < gy + 2.4);
 });
 
 test("paths connect the yard to each room", () => {
