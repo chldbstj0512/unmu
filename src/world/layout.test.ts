@@ -161,6 +161,23 @@ test("the gate opens onto the plaza and the tree holds the cairn", () => {
   walk(YARD.x, YARD.z, plaza.x, plaza.z);
 });
 
+test("the plaza opens into the hundred-seat hall", () => {
+  const exam = SPOTS.find((spot) => spot.id === "exam");
+  assert.ok(exam);
+  assert.equal(exam.key, "8");
+  walk(0, 42.3, exam.x, exam.z);
+  assert.equal(placeAt(exam.x, exam.z), "시험장");
+  assert.equal(nearestZone(exam.x, exam.z)?.kind, "exam");
+  assert.equal(ceilingY(exam.x, exam.z), 3.35);
+});
+
+test("the walking camera looks at the face", () => {
+  const cam = frameCamera(0, 10, 0, 0, -0.2, 3.5, 0.72, true);
+  assert.ok(cam.z < 10);
+  const behind = frameCamera(0, 10, 0, 0, -0.2, 3.5, 0.72, false);
+  assert.ok(behind.z > 10);
+});
+
 test("the cairn narrows as it grows and stops drawing past a day a month", () => {
   assert.equal(cairnStones(0).length, 0);
   const two = cairnStones(2);

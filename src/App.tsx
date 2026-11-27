@@ -7,6 +7,7 @@ import { ambience } from "./audio/ambience.ts";
 import { BreathOverlay, HelpDialog, RecordDialog, VowDialog } from "./ui/Dialogs.tsx";
 import { GateScreen } from "./ui/GateScreen.tsx";
 import { Hud } from "./ui/Hud.tsx";
+import { ExamSheet } from "./ui/ExamSheet.tsx";
 import { StudySheet } from "./ui/StudySheet.tsx";
 
 function detectWebGL() {
@@ -94,6 +95,7 @@ export default function App() {
       <div className="vignette" />
       {entered ? <Hud /> : <GateScreen />}
       <StudySheet />
+      <ExamSheet />
       <RecordDialog />
       <VowDialog />
       <HelpDialog />

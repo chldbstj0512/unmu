@@ -1,6 +1,7 @@
 import type { Visual } from "../experience/atmosphere.ts";
 import { Hanok } from "./Hanok.tsx";
 import { Nature } from "./Nature.tsx";
+import { ExamHall } from "./ExamHall.tsx";
 import { Plaza } from "./Plaza.tsx";
 import { BellTower, Gate, Lanterns, MainHall, Pagoda, StudyRoom, TeaRoom } from "./Props.tsx";
 import { COMPOUND_WALLS, DECK, building } from "./layout.ts";
@@ -42,6 +43,7 @@ export function Temple({ visual, wet }: { visual: Visual; wet: boolean }) {
     <>
       <Nature visual={visual} wet={wet} />
       <Plaza wet={wet} lantern={visual.lantern} />
+      <ExamHall />
       <Compound />
       <Gate />
       <Pagoda />

@@ -21,7 +21,7 @@ export type Building = {
   pavilion?: boolean;
 };
 
-export type ZoneKind = "desk" | "bell" | "breath" | "altar" | "cairn";
+export type ZoneKind = "desk" | "bell" | "breath" | "altar" | "cairn" | "exam";
 
 export type Zone = {
   id: string;
@@ -96,7 +96,8 @@ export const SPAWN = { x: 0, z: 16.2, yaw: 0, pitch: -0.04 };
 export const TREE = { x: 0, z: 40 };
 export const PLAZA = { x: 0, z: 40, r: 12 };
 export const CAIRN = { x: 1.05, z: 38.35 };
-export const BOUNDS = { minX: -22.7, maxX: 22.7, minZ: -22.7, maxZ: 51.4 };
+export const BOUNDS = { minX: -22.7, maxX: 36.2, minZ: -22.7, maxZ: 51.4 };
+export const HALL = { minX: 15.1, maxX: 35.3, minZ: 34.5, maxZ: 50.1, doorMinZ: 40.15, doorMaxZ: 43.55 };
 
 export const LANTERNS = [
   { x: 3.15, z: 3.55 },
@@ -234,9 +235,29 @@ export const PLAZA_WALLS: Aabb[] = [
   vWall(2.4, 21.35, 31.2, 0.55),
   vWall(-2.4, 21.35, 31.2, 0.55),
   vWall(-14.6, 30.4, 52.2, 0.55),
-  vWall(14.6, 30.4, 52.2, 0.55),
+  vWall(14.6, 30.4, HALL.doorMinZ, 0.55),
+  vWall(14.6, HALL.doorMaxZ, 52.2, 0.55),
   hWall(52.2, -14.6, 14.6, 0.55),
+  hWall(HALL.minZ, 14.6, HALL.maxX, 0.5),
+  hWall(HALL.maxZ, 14.6, HALL.maxX, 0.5),
+  vWall(HALL.maxX, HALL.minZ, HALL.maxZ, 0.5),
 ];
+
+export function examSeats(): Array<{ n: number; x: number; z: number }> {
+  const seats: Array<{ n: number; x: number; z: number }> = [];
+  for (let index = 0; index < 100; index += 1) {
+    const row = Math.floor(index / 10);
+    const col = index % 10;
+    const block = col < 5 ? 0 : 1;
+    const inner = col % 5;
+    seats.push({
+      n: index + 1,
+      x: 22.5 + inner * 1.05 + block * 6.15,
+      z: 36.5 + row * 1.28,
+    });
+  }
+  return seats;
+}
 
 function pillars(): Aabb[] {
   return [-PILLAR_X, PILLAR_X].map((x) => ({
@@ -271,6 +292,9 @@ function obstacles(): Aabb[] {
     { minX: 5.25, maxX: 5.95, minZ: 40.15, maxZ: 41.85 },
     { minX: -0.9, maxX: 0.9, minZ: 44.55, maxZ: 45.15 },
   ];
+  for (const seat of examSeats()) {
+    boxes.push({ minX: seat.x - 0.34, maxX: seat.x + 0.34, minZ: seat.z - 0.2, maxZ: seat.z + 0.2 });
+  }
   for (const lx of DESK_X) {
     boxes.push(worldAabb(study, lx - 0.58, lx + 0.58, DESK_Z - 0.28, DESK_Z + 0.28));
   }
@@ -370,6 +394,17 @@ function makeZones(): Zone[] {
       radius: 2.35,
       sit: false,
     },
+    {
+      id: "exam",
+      kind: "exam",
+      verb: "모의고사를 푼다",
+      x: 17.2,
+      z: 42.3,
+      yaw: -Math.PI / 2,
+      eyeY: EYE,
+      radius: 2.4,
+      sit: false,
+    },
   ];
 }
 
@@ -388,6 +423,7 @@ function makeSpots(): Spot[] {
     { key: "5", id: "bell", name: "종루", x: BELL.x, z: BELL.z + 1.65, yaw: 0 },
     { key: "6", id: "pond", name: "연못", x: 13.15, z: 10.72, yaw: Math.PI },
     { key: "7", id: "plaza", name: "광장", x: 0, z: CAIRN.z - 2.15, yaw: Math.PI, pitch: -0.34 },
+    { key: "8", id: "exam", name: "시험장", x: 17.2, z: 42.3, yaw: -Math.PI / 2, pitch: -0.22 },
     { key: "", id: "gate", name: "일주문", x: 0, z: 17.5, yaw: 0 },
   ];
 }
@@ -475,6 +511,7 @@ export function ceilingY(x: number, z: number): number | null {
     const floor = floorAabb(item);
     if (x >= floor.minX && x <= floor.maxX && z >= floor.minZ && z <= floor.maxZ) return item.platform + item.wallHeight;
   }
+  if (x >= HALL.minX && x <= HALL.maxX && z >= HALL.minZ && z <= HALL.maxZ) return 3.35;
   return null;
 }
 
@@ -489,15 +526,25 @@ const LAMPS = [
   ...LANTERNS.map((item) => ({ x: item.x, y: 1.08, z: item.z })),
 ];
 
-export function frameCamera(px: number, pz: number, gy: number, yaw: number, pitch: number, dist: number, side: number) {
-  const lookY = gy + 1.02;
+export function frameCamera(
+  px: number,
+  pz: number,
+  gy: number,
+  yaw: number,
+  pitch: number,
+  dist: number,
+  side: number,
+  front = false,
+) {
+  const lookY = gy + (front ? 0.66 : 1.02);
   if (![px, pz, gy, yaw, pitch, dist, side].every(Number.isFinite)) {
     return { x: px, y: gy + 2.1, z: pz + 0.8, lookY };
   }
   const back = Math.cos(pitch) * dist;
   const lift = -Math.sin(pitch) * dist;
-  const gx = Math.sin(yaw);
-  const gz = Math.cos(yaw);
+  const face = front ? -1 : 1;
+  const gx = Math.sin(yaw) * face;
+  const gz = Math.cos(yaw) * face;
   const rx = Math.cos(yaw);
   const rz = -Math.sin(yaw);
   let [x, z] = march(px, pz, px + gx * back + rx * side, pz + gz * back + rz * side);
@@ -562,6 +609,7 @@ export function placeAt(x: number, z: number): string {
   const px = (x - POND.x) / POND.rx;
   const pz = (z - POND.z) / POND.rz;
   if (px * px + pz * pz < 1.35 || onDeck(x, z)) return "연못";
+  if (x >= HALL.minX && x <= HALL.maxX && z >= HALL.minZ && z <= HALL.maxZ) return "시험장";
   if (Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r) return "광장";
   if (z > COMPOUND.maxZ + 1.5 && z < PLAZA.z && Math.abs(x) < 5) return "길";
   if (Math.hypot(x - PAGODA.x, z - PAGODA.z) < 2.3) return "석탑";

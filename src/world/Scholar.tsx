@@ -141,7 +141,15 @@ export function Scholar() {
             <meshStandardMaterial color="#1a1a1a" roughness={0.4} />
           </mesh>
         ))}
-        <group position={[0, 0.98, 0.02]} rotation={[0.62, 0, 0]}>
+        <mesh position={[0, 0.52, -0.5]}>
+          <sphereGeometry args={[0.028, 10, 8]} />
+          <meshStandardMaterial color="#f0e2d4" roughness={0.7} />
+        </mesh>
+        <mesh position={[0, 0.4, -0.48]} rotation={[Math.PI, 0, 0]}>
+          <torusGeometry args={[0.05, 0.011, 6, 12, Math.PI]} />
+          <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
+        </mesh>
+        <group position={[0, 0.98, -0.04]} rotation={[0.5, Math.PI, 0]}>
           <mesh>
             <circleGeometry args={[0.4, 40]} />
             <meshStandardMaterial color="#f7f4ee" side={THREE.DoubleSide} />

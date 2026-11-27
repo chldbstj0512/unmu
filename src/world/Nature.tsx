@@ -89,7 +89,7 @@ function Mountains() {
       let y = ridge * 0.38 + Math.max(0, noise) * 2.8 * Math.min(1, ridge / 12);
       const south = Math.max(0, z - 18);
       y *= 1 - Math.min(1, south / 28) * Math.exp(-(x * x) / 380) * 0.8;
-      const inPlaza = Math.hypot(x, z - 40) < 22 || (Math.abs(x) < 12 && z > 16 && z < 56);
+      const inPlaza = Math.hypot(x, z - 40) < 22 || (Math.abs(x) < 12 && z > 16 && z < 56) || (x > 10 && x < 42 && z > 30 && z < 54);
       if (inPlaza || radius < 34) y = -2.4;
       else if (radius < 42) y = -2.4 * (1 - (radius - 34) / 8) + y * ((radius - 34) / 8);
       pos.setY(i, y);
@@ -116,8 +116,8 @@ function Ground({ wet }: { wet: boolean }) {
 
 function SouthGround({ wet }: { wet: boolean }) {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 46]} receiveShadow>
-      <planeGeometry args={[64, 36]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[6, 0.012, 44]} receiveShadow>
+      <planeGeometry args={[96, 40]} />
       <meshLambertMaterial color={wet ? "#7a868c" : "#6d7864"} />
     </mesh>
   );

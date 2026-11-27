@@ -177,7 +177,7 @@ export function enterWorld(intention: string, goalHours: number, school: string,
 
 export function travelTo(spot: Spot) {
   if (state.fade) return;
-  commit({ ...state, seatedId: null, sheetOpen: state.seatedId ? false : state.sheetOpen, fade: true }, false);
+  commit({ ...state, seatedId: null, sheetOpen: state.seatedId ? false : state.sheetOpen, examOpen: false, fade: true }, false);
   window.setTimeout(() => {
     bridge.travel = { x: spot.x, z: spot.z, yaw: spot.yaw, pitch: spot.pitch };
     window.setTimeout(() => commit({ ...state, fade: false }, false), 80);
@@ -188,6 +188,11 @@ export function interact(zone: Zone) {
   if (zone.kind === "desk") {
     document.exitPointerLock?.();
     commit({ ...state, seatedId: zone.id, sheetOpen: true }, false);
+    return;
+  }
+  if (zone.kind === "exam") {
+    document.exitPointerLock?.();
+    commit({ ...state, examOpen: true }, false);
     return;
   }
   if (zone.kind === "cairn") {
@@ -242,6 +247,11 @@ export function setRecord(open: boolean) {
 export function setVow(open: boolean) {
   if (open) document.exitPointerLock?.();
   commit({ ...state, vowOpen: open }, false);
+}
+
+export function setExam(open: boolean) {
+  if (open) document.exitPointerLock?.();
+  commit({ ...state, examOpen: open }, false);
 }
 
 export function setHelp(open: boolean) {

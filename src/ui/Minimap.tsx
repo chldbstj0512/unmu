@@ -1,10 +1,11 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { bridge, getWorldSnap, subscribeWorld } from "../experience/bridge.ts";
 import { travelTo } from "../study/store.ts";
-import { BUILDINGS, COMPOUND, PLAZA, POND, SPOTS, floorAabb, type Spot } from "../world/layout.ts";
+import { BUILDINGS, COMPOUND, HALL, PLAZA, POND, SPOTS, floorAabb, type Spot } from "../world/layout.ts";
 
 const HOME = { x0: -20, x1: 20, z0: -20, z1: 22 };
 const SOUTH = { x0: -18, x1: 18, z0: 18, z1: 54 };
+const HALL_MAP = { x0: 12, x1: 38, z0: 32, z1: 54 };
 
 function project(range: typeof HOME) {
   const mx = (x: number) => ((x - range.x0) / (range.x1 - range.x0)) * 100;
@@ -22,9 +23,12 @@ export function Minimap() {
   const arrow = useRef<SVGPolygonElement>(null);
   const place = useSyncExternalStore(subscribeWorld, () => getWorldSnap().place, () => "마당");
   const south = place === "광장" || place === "길";
-  const range = south ? SOUTH : HOME;
+  const inHall = place === "시험장";
+  const range = inHall ? HALL_MAP : south ? SOUTH : HOME;
   const { mx, my } = project(range);
-  const jump = south ? SPOTS.find((spot) => spot.id === "yard") : SPOTS.find((spot) => spot.id === "plaza");
+  const jumps = (inHall ? ["plaza", "yard"] : south ? ["exam", "yard"] : ["plaza"])
+    .map((id) => SPOTS.find((spot) => spot.id === id))
+    .filter((spot): spot is Spot => spot != null);
 
   useEffect(() => {
     let frame = 0;
@@ -54,6 +58,17 @@ export function Minimap() {
             stroke="rgba(246, 239, 226, 0.45)"
             strokeWidth="0.6"
           />
+          {inHall ? (
+            <rect
+              x={mx(HALL.minX)}
+              y={my(HALL.minZ)}
+              width={mx(HALL.maxX) - mx(HALL.minX)}
+              height={my(HALL.maxZ) - my(HALL.minZ)}
+              fill="rgba(232, 214, 186, 0.22)"
+              stroke="rgba(246, 239, 226, 0.55)"
+              strokeWidth="0.7"
+            />
+          ) : null}
           {south ? (
             <ellipse
               cx={mx(PLAZA.x)}
@@ -106,14 +121,19 @@ export function Minimap() {
           </button>
         ))}
       </div>
-      {jump ? (
-        <button
-          type="button"
-          className="rounded-md border border-white/25 bg-black/35 px-2.5 py-1 text-xs text-[#f6efe2] backdrop-blur-md"
-          onClick={() => travelTo(jump)}
-        >
-          {jump.key} {jump.name}
-        </button>
+      {jumps.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {jumps.map((spot) => (
+            <button
+              key={spot.id}
+              type="button"
+              className="rounded-md border border-white/25 bg-black/35 px-2.5 py-1 text-xs text-[#f6efe2] backdrop-blur-md"
+              onClick={() => travelTo(spot)}
+            >
+              {spot.key} {spot.name}
+            </button>
+          ))}
+        </div>
       ) : null}
     </div>
   );

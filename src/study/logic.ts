@@ -36,6 +36,7 @@ export type StudyState = {
   recordOpen: boolean;
   vowOpen: boolean;
   helpOpen: boolean;
+  examOpen: boolean;
   entered: boolean;
   fade: boolean;
   tick: number;
@@ -166,6 +167,7 @@ export function defaultState(): StudyState {
     recordOpen: false,
     vowOpen: false,
     helpOpen: false,
+    examOpen: false,
     entered: false,
     fade: false,
     tick: 0,

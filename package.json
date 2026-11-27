@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview --host 0.0.0.0 --port 4721 --strictPort",
-    "test": "node --experimental-strip-types --test src/study/logic.test.ts src/world/layout.test.ts src/world/geometry.test.ts"
+    "test": "node --experimental-strip-types --test src/study/logic.test.ts src/study/exam.test.ts src/world/layout.test.ts src/world/geometry.test.ts"
   },
   "dependencies": {
     "@fontsource/nanum-myeongjo": "^5.3.0",

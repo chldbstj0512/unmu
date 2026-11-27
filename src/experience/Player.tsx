@@ -8,6 +8,7 @@ import {
   BOUNDS,
   BUILDINGS,
   EYE,
+  HALL,
   PLAYER_R,
   SPAWN,
   SPOTS,
@@ -25,6 +26,7 @@ const STEP = 0.42;
 const LOOK = 0.0048;
 
 function inRoom(x: number, z: number) {
+  if (x >= HALL.minX && x <= HALL.maxX && z >= HALL.minZ && z <= HALL.maxZ) return true;
   return BUILDINGS.some((item) => {
     if (item.pavilion) return false;
     const floor = floorAabb(item);
@@ -69,7 +71,7 @@ export function Player() {
     let lastY = 0;
     const canLook = () => {
       const current = getState();
-      return current.entered && !current.sheetOpen && !current.breathOpen && !current.vowOpen && !current.recordOpen && !current.helpOpen && !current.fade;
+      return current.entered && !current.sheetOpen && !current.breathOpen && !current.vowOpen && !current.recordOpen && !current.helpOpen && !current.examOpen && !current.fade;
     };
     const onDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
@@ -131,8 +133,9 @@ export function Player() {
         if (event.repeat && (event.code === "KeyE" || event.code.startsWith("Digit"))) return;
         setKey(event.code, true);
         if (event.code === "KeyE") {
-          const zone = nearestZone(pos.current.x, pos.current.z);
           const current = getState();
+          if (current.examOpen) return;
+          const zone = nearestZone(pos.current.x, pos.current.z);
           if (zone && !current.seatedId) interact(zone);
         }
         if (event.code === "Escape") {
@@ -169,8 +172,8 @@ export function Player() {
     const delta = Math.min(0.05, dt);
     if (!enteredRef.current) {
       const t = state.clock.elapsedTime;
-      camera.position.set(Math.sin(t * 0.07) * 0.7, 2.55, 18.6);
-      camera.lookAt(0, 1.8, -8);
+      camera.position.set(2.2 + Math.sin(t * 0.07) * 0.15, 1.2, 8.15);
+      camera.lookAt(2.9, 0.62, 10.6);
       return;
     }
 
@@ -199,7 +202,7 @@ export function Player() {
       pitch.current = clamp(pitch.current + input.lookY * LOOK, -0.7, 0.35);
       input.lookX = 0;
       input.lookY = 0;
-    } else if (!snapped) {
+    } else if (!snapped && !getState().examOpen) {
       seatAim.current = null;
       yaw.current -= input.lookX * LOOK;
       pitch.current = clamp(pitch.current + input.lookY * LOOK, -0.85, 0.45);
@@ -255,9 +258,11 @@ export function Player() {
       pitch.current = SPAWN.pitch;
     }
     const gy = groundY(pos.current.x, pos.current.z);
-    const dist = seated ? 2.85 : inRoom(pos.current.x, pos.current.z) ? 2.6 : 4.5;
-    const side = seated ? 1.15 : 0.82;
-    const pose = frameCamera(pos.current.x, pos.current.z, gy, yaw.current, pitch.current, dist, side);
+    const indoors = inRoom(pos.current.x, pos.current.z);
+    const front = !seated && !indoors;
+    const dist = seated ? 2.85 : indoors ? 2.6 : 3.5;
+    const side = seated ? 1.15 : front ? 0.72 : 0.82;
+    const pose = frameCamera(pos.current.x, pos.current.z, gy, yaw.current, pitch.current, dist, side, front);
     camera.up.set(0, 1, 0);
     camera.position.set(pose.x, pose.y, pose.z);
     camera.lookAt(pos.current.x, pose.lookY, pos.current.z);
