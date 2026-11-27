@@ -6,6 +6,45 @@ import { useStudy } from "../study/store.ts";
 
 const GATE = { x: 2.9, z: 10.6, yaw: 0.1 };
 
+const HEAD_Y = 0.5;
+const HEAD_RX = 0.46;
+const HEAD_RY = 0.46 * 1.012;
+const HEAD_RZ = 0.46;
+
+type FaceLay = {
+  position: [number, number, number];
+  quaternion: [number, number, number, number];
+};
+
+function layOnFace(x: number, y: number, halfDepth: number, protrusion: number): FaceLay {
+  const yy = y - HEAD_Y;
+  const gx = x / (HEAD_RX * HEAD_RX);
+  const gy = yy / (HEAD_RY * HEAD_RY);
+  const radial = 1 - (x * x) / (HEAD_RX * HEAD_RX) - (yy * yy) / (HEAD_RY * HEAD_RY);
+  const z = -HEAD_RZ * Math.sqrt(Math.max(radial, 0));
+  const normal = new THREE.Vector3(gx, gy, z / (HEAD_RZ * HEAD_RZ)).normalize();
+  const hinge = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 0, 1), normal);
+  if (hinge.lengthSq() < 1e-8) hinge.set(1, 0, 0);
+  else hinge.normalize();
+  const tangent = new THREE.Vector3().crossVectors(normal, hinge).normalize();
+  const quaternion = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(hinge, tangent, normal));
+  const center = new THREE.Vector3(x, y, z).addScaledVector(normal, protrusion - halfDepth);
+  return {
+    position: [center.x, center.y, center.z],
+    quaternion: [quaternion.x, quaternion.y, quaternion.z, quaternion.w],
+  };
+}
+
+const EYE_R = 0.045;
+const EYE_DEPTH = 0.22;
+const EYES = [-0.12, 0.12].map((x) => layOnFace(x, 0.62, EYE_R * EYE_DEPTH, 0.006));
+const NOSE_R = 0.03;
+const NOSE_DEPTH = 0.42;
+const NOSE = layOnFace(0, 0.52, NOSE_R * NOSE_DEPTH, 0.008);
+const MOUTH_TUBE = 0.011;
+const MOUTH_DEPTH = 0.32;
+const MOUTH = layOnFace(0, 0.4, MOUTH_TUBE * MOUTH_DEPTH, 0.0045);
+
 function arcText(g: CanvasRenderingContext2D, text: string, radius: number) {
   const chars = [...text];
   if (chars.length === 0) return;
@@ -135,18 +174,18 @@ export function Scholar() {
             </mesh>
           ))}
         </group>
-        {[-0.12, 0.12].map((x) => (
-          <mesh key={x} position={[x, 0.62, -0.48]}>
-            <sphereGeometry args={[0.042, 12, 10]} />
-            <meshStandardMaterial color="#1a1a1a" roughness={0.4} />
+        {EYES.map((eye, index) => (
+          <mesh key={index} position={eye.position} quaternion={eye.quaternion} scale={[1, 1, EYE_DEPTH]} renderOrder={2}>
+            <sphereGeometry args={[EYE_R, 20, 14]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.62} />
           </mesh>
         ))}
-        <mesh position={[0, 0.52, -0.5]}>
-          <sphereGeometry args={[0.028, 10, 8]} />
-          <meshStandardMaterial color="#f0e2d4" roughness={0.7} />
+        <mesh position={NOSE.position} quaternion={NOSE.quaternion} scale={[1, 1, NOSE_DEPTH]} renderOrder={2}>
+          <sphereGeometry args={[NOSE_R, 16, 12]} />
+          <meshStandardMaterial color="#f0e2d4" roughness={0.72} />
         </mesh>
-        <mesh position={[0, 0.4, -0.48]} rotation={[Math.PI, 0, 0]}>
-          <torusGeometry args={[0.05, 0.011, 6, 12, Math.PI]} />
+        <mesh position={MOUTH.position} quaternion={MOUTH.quaternion} scale={[1, 1, MOUTH_DEPTH]} renderOrder={2}>
+          <torusGeometry args={[0.05, MOUTH_TUBE, 8, 20, Math.PI]} />
           <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
         </mesh>
         <group position={[0, 1.04, -0.3]} rotation={[0.42, Math.PI, 0]}>
