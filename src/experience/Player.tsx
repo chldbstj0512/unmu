@@ -55,7 +55,9 @@ export function Player() {
   seatedRef.current = seatedId;
   const pos = useRef({ x: SPAWN.x, y: EYE, z: SPAWN.z });
   const yaw = useRef(SPAWN.yaw);
+  const bodyYaw = useRef(SPAWN.yaw);
   const pitch = useRef(SPAWN.pitch);
+  const camSmooth = useRef<{ x: number; y: number; z: number } | null>(null);
   const bob = useRef(0);
   const reduced = useRef(false);
   const seatAim = useRef<string | null>(null);
@@ -183,7 +185,9 @@ export function Player() {
       pos.current.x = travel.x;
       pos.current.z = travel.z;
       yaw.current = travel.yaw;
-      pitch.current = clamp(travel.pitch ?? -0.2, -0.7, 0.25);
+      bodyYaw.current = travel.yaw;
+      pitch.current = clamp(travel.pitch ?? -0.32, -0.7, 0.25);
+      camSmooth.current = null;
       bridge.travel = null;
       snapped = true;
     }
@@ -193,6 +197,7 @@ export function Player() {
       if (seatAim.current !== seated.id) {
         seatAim.current = seated.id;
         yaw.current = seated.yaw;
+        bodyYaw.current = seated.yaw;
         pitch.current = -0.28;
       }
       const k = 1 - Math.pow(0.0015, delta);
@@ -250,7 +255,12 @@ export function Player() {
       if (!blocked(bx, pos.current.z, PLAYER_R)) pos.current.x = bx;
       if (!blocked(pos.current.x, bz, PLAYER_R)) pos.current.z = bz;
 
-      if (Math.hypot(mx, mz) > 0.0004 && !reduced.current) bob.current += delta * 8;
+      if (Math.hypot(mx, mz) > 0.0004) {
+        const desired = Math.atan2(-mx, -mz);
+        const turn = Math.atan2(Math.sin(desired - bodyYaw.current), Math.cos(desired - bodyYaw.current));
+        bodyYaw.current += turn * (1 - Math.exp(-delta / 0.09));
+        if (!reduced.current) bob.current += delta * 8;
+      }
     }
 
     if (!Number.isFinite(yaw.current) || !Number.isFinite(pitch.current)) {
@@ -259,17 +269,35 @@ export function Player() {
     }
     const gy = groundY(pos.current.x, pos.current.z);
     const indoors = inRoom(pos.current.x, pos.current.z);
-    const front = !seated && !indoors;
-    const dist = seated ? 2.85 : indoors ? 2.6 : 3.5;
-    const side = seated ? 1.15 : front ? 0.72 : 0.82;
-    const pose = frameCamera(pos.current.x, pos.current.z, gy, yaw.current, pitch.current, dist, side, front);
+    const shoulder = !seated;
+    const dist = seated ? 2.85 : indoors ? 0.85 : 0.55;
+    const side = seated ? 1.15 : indoors ? 1.7 : 2.7;
+    const pose = frameCamera(
+      pos.current.x,
+      pos.current.z,
+      gy,
+      yaw.current,
+      pitch.current,
+      dist,
+      side,
+      false,
+      shoulder ? 0.62 : 1.02,
+      shoulder ? (indoors ? 0.55 : 0.8) : 0,
+    );
+    if (snapped || !camSmooth.current) camSmooth.current = { x: pose.x, y: pose.y, z: pose.z };
+    else {
+      const follow = 1 - Math.exp(-delta / 0.16);
+      camSmooth.current.x += (pose.x - camSmooth.current.x) * follow;
+      camSmooth.current.y += (pose.y - camSmooth.current.y) * follow;
+      camSmooth.current.z += (pose.z - camSmooth.current.z) * follow;
+    }
     camera.up.set(0, 1, 0);
-    camera.position.set(pose.x, pose.y, pose.z);
+    camera.position.set(camSmooth.current.x, camSmooth.current.y, camSmooth.current.z);
     camera.lookAt(pos.current.x, pose.lookY, pos.current.z);
     bridge.player.x = pos.current.x;
     bridge.player.y = gy + 1.05;
     bridge.player.z = pos.current.z;
-    bridge.player.yaw = yaw.current;
+    bridge.player.yaw = bodyYaw.current;
     bridge.player.ground = gy;
     bridge.player.seated = Boolean(seated);
     bridge.player.bob = bob.current;

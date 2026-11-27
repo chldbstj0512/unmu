@@ -535,8 +535,10 @@ export function frameCamera(
   dist: number,
   side: number,
   front = false,
+  look?: number,
+  rise = 0,
 ) {
-  const lookY = gy + (front ? 0.66 : 1.02);
+  const lookY = gy + (look ?? (front ? 0.66 : 1.02));
   if (![px, pz, gy, yaw, pitch, dist, side].every(Number.isFinite)) {
     return { x: px, y: gy + 2.1, z: pz + 0.8, lookY };
   }
@@ -548,7 +550,7 @@ export function frameCamera(
   const rx = Math.cos(yaw);
   const rz = -Math.sin(yaw);
   let [x, z] = march(px, pz, px + gx * back + rx * side, pz + gz * back + rz * side);
-  let y = Math.max(gy + 1.05 + lift, groundY(x, z) + 0.55);
+  let y = Math.max(gy + 1.05 + lift + rise, groundY(x, z) + 0.55);
   const underRoof = () => {
     const cap = ceilingY(x, z);
     if (cap != null) y = Math.min(y, cap - 0.28);

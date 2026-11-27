@@ -108,7 +108,7 @@ export function HelpDialog() {
         <DialogTitle className="text-2xl font-semibold tracking-tight">안내</DialogTitle>
         <DialogDescription className="mt-2 text-sm leading-7 text-[#3d3228]">
           걷기 WASD 또는 화살표. Shift는 천천히. 마당을 누른 채 마우스를 좌우로 끌면 시야가 돌아간다. Esc로 손을 놓는다.
-          방석 앞에서 E, 또는 글을 누르면 앉는다. 걸을 때는 카메라가 얼굴을 본다. 지도의 번호나 숫자 1부터 8까지 장소를 옮긴다. 광장 나무 아래에는 하루에 돌 하나를 얹고, 광장 동쪽 시험장에서 수능 모의고사를 푼다.
+          방석 앞에서 E, 또는 글을 누르면 앉는다. 걸을 때 카메라는 어깨 뒤 위에 있고, 마우스를 끌면 주위를 돈다. 지도의 번호나 숫자 1부터 8까지 장소를 옮긴다. 광장 나무 아래에는 하루에 돌 하나를 얹고, 광장 동쪽 시험장에서 수능 모의고사를 푼다.
         </DialogDescription>
         <ul className="mt-4 grid grid-cols-2 gap-2 text-sm">
           {SPOTS.filter((spot) => spot.key).map((spot) => (

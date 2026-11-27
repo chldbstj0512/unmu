@@ -171,11 +171,13 @@ test("the plaza opens into the hundred-seat hall", () => {
   assert.equal(ceilingY(exam.x, exam.z), 3.35);
 });
 
-test("the walking camera looks at the face", () => {
-  const cam = frameCamera(0, 10, 0, 0, -0.2, 3.5, 0.72, true);
-  assert.ok(cam.z < 10);
-  const behind = frameCamera(0, 10, 0, 0, -0.2, 3.5, 0.72, false);
-  assert.ok(behind.z > 10);
+test("the walking camera sits behind one shoulder", () => {
+  const cam = frameCamera(0, 10, 0, 0, -0.2, 0.55, 2.7, false, 0.62, 0.8);
+  assert.ok(cam.z > 10);
+  assert.ok(cam.x > 2);
+  assert.ok(cam.y > 1.6);
+  assert.ok(cam.y < 2.6);
+  assert.ok(cam.lookY < 0.8);
 });
 
 test("the cairn narrows as it grows and stops drawing past a day a month", () => {
