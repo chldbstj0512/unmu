@@ -3,6 +3,7 @@ import { Button } from "../components/ui/button.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "../components/ui/dialog.tsx";
 import { Input } from "../components/ui/input.tsx";
 import { formatSpan, sessionsByDay, weekTotals } from "../study/logic.ts";
+import { useAccount } from "../account/client.ts";
 import { dispatch, setBreath, setHelp, setRecord, setVow, travelTo, useStudy } from "../study/store.ts";
 import { SPOTS } from "../world/layout.ts";
 
@@ -16,12 +17,15 @@ export function RecordDialog() {
   const week = weekTotals(sessions, now);
   const max = Math.max(1, ...week.map((day) => day.seconds));
   const today = week.at(-1)?.seconds ?? 0;
+  const signedIn = useAccount().user != null;
 
   return (
     <Dialog open={open} onOpenChange={setRecord}>
       <DialogContent>
         <DialogTitle className="text-2xl font-semibold tracking-tight">공부 기록</DialogTitle>
-        <DialogDescription className="mt-1 text-sm text-[#6b5c4a]">이 브라우저에만 남는다. 오늘은 {formatSpan(today)} / {formatSpan(goal)}.</DialogDescription>
+        <DialogDescription className="mt-1 text-sm text-[#6b5c4a]">
+          {signedIn ? "이 계정에 남는다." : "이 브라우저에만 남는다."} 오늘은 {formatSpan(today)} / {formatSpan(goal)}.
+        </DialogDescription>
         <div className="mt-5 flex h-24 items-end gap-2">
           {week.map((day) => (
             <div key={day.key} className="flex flex-1 flex-col items-center gap-1">

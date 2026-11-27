@@ -2,6 +2,7 @@ import { Component, memo, useEffect, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Scene } from "./experience/Scene.tsx";
 import { visualFor } from "./experience/atmosphere.ts";
+import { ensureAccount } from "./account/client.ts";
 import { engineTick, useStudy } from "./study/store.ts";
 import { ambience } from "./audio/ambience.ts";
 import { BreathOverlay, HelpDialog, RecordDialog, VowDialog } from "./ui/Dialogs.tsx";
@@ -87,6 +88,9 @@ function Backdrop() {
 export default function App() {
   const entered = useStudy((state) => state.entered);
   const fade = useStudy((state) => state.fade);
+  useEffect(() => {
+    void ensureAccount();
+  }, []);
   return (
     <div className="fixed inset-0 overflow-hidden">
       <Engine />

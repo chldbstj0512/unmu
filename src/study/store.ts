@@ -10,6 +10,7 @@ import {
   formatClock,
   reduce,
   remainingSeconds,
+  seoulDate,
   seoulTimeOfDay,
   stoneDays,
 } from "./logic.ts";
@@ -102,9 +103,72 @@ let state = boot();
 const listeners = new Set<() => void>();
 
 function commit(next: StudyState, persist: boolean) {
+  const previous = state;
+  const added = next.sessions.filter((session) => !previous.sessions.some((item) => item.id === session.id));
+  const cleared = previous.sessions.length > 0 && next.sessions.length === 0;
+  const profile =
+    next.school !== previous.school ||
+    next.department !== previous.department ||
+    next.intention !== previous.intention ||
+    next.goalSeconds !== previous.goalSeconds;
   state = next;
   if (persist) write(state);
   listeners.forEach((listener) => listener());
+  if (!persist) return;
+  if (added.length > 0 || cleared || profile) {
+    void import("../account/client.ts").then((account) => {
+      for (const session of added) void account.pushLog(session);
+      if (cleared) void account.clearServerLogs();
+      if (profile) {
+        void account.saveProfile({
+          school: next.school,
+          department: next.department,
+          intention: next.intention,
+          goalHours: next.goalSeconds / 3600,
+        });
+      }
+    });
+  }
+}
+
+export function hydrateAccount(input: {
+  school: string;
+  department: string;
+  intention: string;
+  goalSeconds: number;
+  sessions: Session[];
+  stones: string[];
+}) {
+  commit(
+    {
+      ...state,
+      school: input.school,
+      department: input.department,
+      intention: input.intention,
+      goalSeconds: input.goalSeconds,
+      sessions: input.sessions,
+      stones: input.stones,
+    },
+    true,
+  );
+}
+
+export function leaveAccount() {
+  commit(
+    {
+      ...state,
+      entered: false,
+      school: "",
+      department: "",
+      intention: "",
+      sessions: [],
+      stones: [],
+      seatedId: null,
+      sheetOpen: false,
+      examOpen: false,
+    },
+    true,
+  );
 }
 
 function subscribe(listener: () => void) {
@@ -228,6 +292,7 @@ export function stackStone(now = Date.now()) {
     },
     true,
   );
+  void import("../account/client.ts").then((account) => account.pushStone(seoulDate(now)));
 }
 
 export function stand() {
