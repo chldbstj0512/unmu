@@ -111,7 +111,7 @@ export function Scholar() {
     const seated = here && player.seated;
     const idle = seated ? 0 : Math.sin(here ? player.bob : clock.elapsedTime * 1.4);
     pose.position.y = seated ? 0.16 : Math.abs(idle) * 0.045;
-    torso.scale.y = seated ? 0.74 : 0.92;
+    torso.scale.y = seated ? 0.814 : 1.012;
     torso.rotation.z = seated ? 0 : idle * 0.05;
     toes.visible = !seated;
   });
@@ -123,7 +123,7 @@ export function Scholar() {
         <meshBasicMaterial color="#1a120c" transparent opacity={0.28} depthWrite={false} />
       </mesh>
       <group ref={rig}>
-        <mesh ref={body} position={[0, 0.5, 0]} castShadow scale={[1, 0.92, 1]}>
+        <mesh ref={body} position={[0, 0.5, 0]} castShadow scale={[1, 1.012, 1]}>
           <sphereGeometry args={[0.46, 28, 22]} />
           <meshStandardMaterial color="#f7f4ee" roughness={0.62} />
         </mesh>
@@ -136,7 +136,7 @@ export function Scholar() {
           ))}
         </group>
         {[-0.12, 0.12].map((x) => (
-          <mesh key={x} position={[x, 0.62, -0.48]}>
+          <mesh key={x} position={[x, 0.62, -0.48]} scale={[0.8, 1, 1]}>
             <sphereGeometry args={[0.042, 12, 10]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.4} />
           </mesh>
@@ -149,7 +149,7 @@ export function Scholar() {
           <torusGeometry args={[0.05, 0.011, 6, 12, Math.PI]} />
           <meshStandardMaterial color="#1a1a1a" roughness={0.5} />
         </mesh>
-        <group position={[0, 0.98, -0.04]} rotation={[0.5, Math.PI, 0]}>
+        <group position={[0, 1.04, -0.3]} rotation={[0.42, Math.PI, 0]}>
           <mesh>
             <circleGeometry args={[0.4, 40]} />
             <meshStandardMaterial color="#f7f4ee" side={THREE.DoubleSide} />
