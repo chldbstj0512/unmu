@@ -136,7 +136,7 @@ export function Scholar() {
           ))}
         </group>
         {[-0.12, 0.12].map((x) => (
-          <mesh key={x} position={[x, 0.62, -0.48]} scale={[0.8, 1, 1]}>
+          <mesh key={x} position={[x, 0.62, -0.48]}>
             <sphereGeometry args={[0.042, 12, 10]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.4} />
           </mesh>
